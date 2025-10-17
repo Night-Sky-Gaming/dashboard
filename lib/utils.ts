@@ -23,10 +23,10 @@ export function getDiscordAvatarUrl(userId: string, avatar?: string): string {
 }
 
 export function calculateLevelProgress(exp: number): { level: number; progress: number } {
-  // Standard Discord bot leveling formula: exp = 5 * level^2 + 50 * level + 100
-  const level = Math.floor((-50 + Math.sqrt(2500 + 20 * exp)) / 10);
-  const currentLevelExp = 5 * level * level + 50 * level + 100;
-  const nextLevelExp = 5 * (level + 1) * (level + 1) + 50 * (level + 1) + 100;
+  // Your bot's leveling formula: level = floor(0.1 * sqrt(xp)) + 1
+  const level = Math.floor(0.1 * Math.sqrt(exp)) + 1;
+  const currentLevelExp = Math.pow((level - 1) * 10, 2);
+  const nextLevelExp = Math.pow(level * 10, 2);
   const progress = ((exp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100;
   
   return { level, progress };

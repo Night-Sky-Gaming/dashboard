@@ -1,6 +1,6 @@
 # Discord Bot Dashboard
 
-A modern, responsive dashboard for your Discord.js bot built with Next.js, TypeScript, and Tailwind CSS.
+A modern, responsive dashboard for the Andromeda Gaming Background bot built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -25,7 +25,7 @@ A modern, responsive dashboard for your Discord.js bot built with Next.js, TypeS
 ### Prerequisites
 
 - Node.js 18+ installed
-- Your Discord bot's SQLite database file
+- A SQLite database file
 
 ### Installation
 
@@ -46,40 +46,38 @@ cp .env.example .env
 Edit `.env` and configure:
 
 ```env
-# Path to your bot's SQLite database
-DATABASE_PATH=./database.sqlite
+# Path to the bot's SQLite database (absolute path recommended)
+DATABASE_PATH=C:/path/to/your/bot/leveling.db
 
-# Discord Configuration (optional, for future features)
+# Discord Configuration
 DISCORD_CLIENT_ID=your_client_id_here
 DISCORD_CLIENT_SECRET=your_client_secret_here
-NEXT_PUBLIC_DISCORD_BOT_NAME=Your Bot Name
+NEXT_PUBLIC_DISCORD_BOT_NAME=Andromeda Gaming Background Bot
 ```
 
-3. **Copy your bot's database:**
-
-Copy your bot's SQLite database file to the dashboard directory or update the `DATABASE_PATH` in `.env` to point to your bot's database location.
+> **Important:** Use an absolute path for `DATABASE_PATH` to avoid connection issues. The dashboard connects in **read-only mode** to safely access the bot's database without interfering with bot operations.
 
 ### Database Schema
 
-The dashboard expects the following database structure (adjust queries in `lib/database/queries.ts` if your schema differs):
+This dashboard is configured for the **Andromeda Gaming Background bot** database structure:
 
-**user_stats table:**
+**users table:**
 ```sql
-CREATE TABLE user_stats (
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  server_id TEXT NOT NULL,
-  username TEXT NOT NULL,
-  avatar TEXT,
-  exp INTEGER DEFAULT 0,
-  level INTEGER DEFAULT 0,
-  messages INTEGER DEFAULT 0,
-  voice_time INTEGER DEFAULT 0,
-  coins INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, server_id)
+  guild_id TEXT NOT NULL,
+  xp INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1,
+  last_message INTEGER DEFAULT 0,
+  UNIQUE(user_id, guild_id)
 );
 ```
+
+**Key Features:**
+- Tracks user XP and levels per guild
+- Uses the formula: `level = floor(0.1 * sqrt(xp)) + 1`
+- Read-only access to prevent conflicts with the bot
 
 ### Running the Dashboard
 
@@ -130,16 +128,20 @@ dashboard/
 └── next.config.js
 ```
 
-## Customization
+## Customisation
 
 ### Database Queries
 
-If your bot uses a different database schema, update the queries in `lib/database/queries.ts`:
+The dashboard queries are configured for the bot's schema:
 
-- `getLeaderboard()` - Modify to match your leaderboard table
-- `getUserStats()` - Adjust for your user stats structure
-- `getServers()` - Update to fetch from your servers table
-- `getServerStats()` - Customize stat calculations
+**Table:** `users`
+**Columns:** `user_id`, `guild_id`, `xp`, `level`, `last_message`
+
+Query implementations in `lib/database/queries.ts`:
+- `getLeaderboard()` - Orders by `xp DESC` for guild ranking
+- `getUserStats()` - Fetches user data by `user_id` and `guild_id`
+- `getServers()` - Gets distinct `guild_id` values
+- `getServerStats()` - Aggregates total users and XP per guild
 
 ### Styling
 
@@ -156,94 +158,179 @@ colors: {
 }
 ```
 
-Modify these colors to match your brand.
-
 ### Leveling Formula
 
-The leveling calculation in `lib/utils.ts` uses this formula:
+The dashboard uses the following leveling formula:
 
-```
-exp = 5 * level² + 50 * level + 100
+```javascript
+level = Math.floor(0.1 * Math.sqrt(xp)) + 1
 ```
 
-Adjust the `calculateLevelProgress()` function if your bot uses a different formula.
+**XP Requirements:**
+- Level 1: 0 XP
+- Level 2: 100 XP
+- Level 3: 400 XP
+- Level 10: 10,000 XP
+- Level 20: 40,000 XP
+
+The formula is implemented in `lib/utils.ts` in the `calculateLevelProgress()` function.
 
 ## API Endpoints
 
 ### GET `/api/leaderboard`
-Fetch leaderboard data for a server.
+Fetch leaderboard data for the guild.
 
 **Query Parameters:**
-- `serverId` (required) - Discord server ID
+- `serverId` (required) - Discord guild ID
 - `limit` (optional) - Number of users to return (default: 100)
 
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "rank": 1,
+      "user_id": "123456789",
+      "xp": 15000,
+      "level": 25
+    }
+  ]
+}
+```
+
 ### GET `/api/users`
-Get user statistics.
+Get user statistics for a specific guild.
 
 **Query Parameters:**
 - `userId` (required) - Discord user ID
-- `serverId` (required) - Discord server ID
+- `serverId` (required) - Discord guild ID
 
 ### GET `/api/servers`
-List all servers in the database.
+List all guilds in the database.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "987654321",
+      "name": "987654321"
+    }
+  ]
+}
+```
 
 ### GET `/api/servers/stats`
-Get statistics for a specific server.
+Get aggregated statistics for a specific guild.
 
 **Query Parameters:**
-- `serverId` (required) - Discord server ID
+- `serverId` (required) - Discord guild ID
 
-## Connecting to Your Bot
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "total_users": 150,
+    "total_exp": 1500000,
+    "total_messages": 0,
+    "active_users_today": 0
+  }
+}
+```
 
-To connect this dashboard to your Discord bot's database:
+## Connecting to the Bot
 
-1. Ensure your bot uses SQLite for data storage
-2. Copy the database file to the dashboard directory or configure the path in `.env`
-3. Adjust the database queries in `lib/database/queries.ts` to match your schema
-4. The dashboard connects in read-only mode to prevent data corruption
+This dashboard is specifically configured for **Andromeda Gaming**:
+
+1. **Locate the bot's database:** Find `leveling.db` in the bot's directory
+2. **Set the path:** Update `DATABASE_PATH` in `.env` with the absolute path
+3. **Start the dashboard:** Run `npm run dev` or `npm start`
+4. **Select a guild:** Use the dropdown in the header to choose a server
+
+**Database Connection Details:**
+- Connects in **read-only mode** (safe to run alongside the bot)
+- No writes to the database (prevents conflicts)
+- Automatically handles WAL mode if enabled by the bot
+- Queries the `users` table with `guild_id` and `xp` columns
+
+**Troubleshooting:**
+- If you see "Database connection failed", verify the `DATABASE_PATH` is correct
+- Ensure the bot has created the database file (run the bot at least once)
+- Check that the path uses forward slashes (/) even on Windows
 
 ## Deployment
 
-### Vercel (Recommended)
+### Local/VPS Deployment (Recommended)
 
-1. Push your code to GitHub
-2. Import the project to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy
+Since the dashboard connects directly to the bot's SQLite database file, it's best deployed on the same machine as the bot:
 
-**Note:** For production, consider using a database that supports concurrent connections better than SQLite (PostgreSQL, MySQL, etc.)
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+The server will run on port 3000 by default.
 
 ## Future Enhancements
 
+**Dashboard Improvements:**
 - [ ] Discord OAuth2 authentication
 - [ ] Real-time updates with WebSockets
-- [ ] User profile pages
-- [ ] Advanced analytics
-- [ ] Command usage statistics
-- [ ] Server settings management
+- [ ] User profile pages with detailed stats
+- [ ] XP gain history charts
 - [ ] Dark/Light theme toggle
 - [ ] Export data to CSV/JSON
+
+**Bot Integration (requires bot updates):**
+- [ ] Store usernames for better display
+- [ ] Track message counts
+- [ ] Store avatar hashes
+- [ ] Add guild name caching
+- [ ] Track last active timestamps
+- [ ] Add command usage statistics
 
 ## Troubleshooting
 
 ### Database Connection Issues
 
-If you see "Database connection failed":
-1. Verify the `DATABASE_PATH` in `.env` is correct
-2. Ensure the database file exists and is accessible
-3. Check file permissions
+**Error:** "Database connection failed"
+- ✅ Verify `DATABASE_PATH` in `.env` points to `leveling.db`
+- ✅ Use absolute path (e.g., `C:/Users/Name/bot/leveling.db`)
+- ✅ Ensure bot has created the database (run bot at least once)
+- ✅ Check file permissions (readable by the dashboard)
+
+**Error:** "attempt to write a readonly database"
+- This was fixed in the latest version
+- Ensure you have the updated `lib/database/connection.ts`
+- The dashboard no longer tries to set WAL mode
+
+### No Data Showing
+
+1. **Check if bot has data:** Run your bot and have users gain XP
+2. **Verify table exists:** Open `leveling.db` in a SQLite browser
+3. **Select a server:** Click the dropdown in the header to choose a guild
+
+### Infinite Loading / Flickering
+
+This was fixed in the latest version with event-based server switching.
+If you still see this:
+1. Clear browser cache
+2. Rebuild: `npm run build`
+3. Restart: `npm start`
 
 ### TypeScript Errors
 
 Run `npm install` to ensure all dependencies are installed, then restart your editor.
 
-### Build Errors
+### Build Warnings
 
-Clear the Next.js cache:
-```bash
-rm -rf .next
-npm run build
-```
+The "Dynamic server usage" warnings during build are **normal** for API routes that use query parameters. They don't affect functionality.
 
 ## Contributing
 

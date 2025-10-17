@@ -7,12 +7,22 @@ import { Bell, Search } from 'lucide-react';
 export default function Header() {
   const [selectedServer, setSelectedServer] = useState<string | null>(null);
 
+  const handleServerChange = (serverId: string) => {
+    setSelectedServer(serverId);
+    // Store in localStorage for other components to access
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedServer', serverId);
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('serverChanged', { detail: serverId }));
+    }
+  };
+
   return (
     <header className="flex items-center justify-between h-16 px-6 bg-discord-dark-tertiary border-b border-gray-700">
       <div className="flex items-center flex-1">
         <ServerSelector 
           selectedServer={selectedServer}
-          onServerChange={setSelectedServer}
+          onServerChange={handleServerChange}
         />
       </div>
       

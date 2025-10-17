@@ -9,20 +9,20 @@ export class DatabaseService {
     const db = getDatabase();
     
     try {
-      // This query assumes a table structure - adjust column names as needed
+      // Query adjusted for your bot's schema (users table with xp, level columns)
       const query = `
         SELECT 
-          ROW_NUMBER() OVER (ORDER BY exp DESC) as rank,
+          ROW_NUMBER() OVER (ORDER BY xp DESC) as rank,
           user_id,
-          username,
-          avatar,
-          exp,
+          user_id as username,
+          NULL as avatar,
+          xp as exp,
           level,
-          messages,
-          coins
-        FROM user_stats
-        WHERE server_id = ?
-        ORDER BY exp DESC
+          0 as messages,
+          0 as coins
+        FROM users
+        WHERE guild_id = ?
+        ORDER BY xp DESC
         LIMIT ?
       `;
       
@@ -42,8 +42,16 @@ export class DatabaseService {
     
     try {
       const query = `
-        SELECT * FROM user_stats
-        WHERE user_id = ? AND server_id = ?
+        SELECT 
+          user_id,
+          guild_id as server_id,
+          xp as exp,
+          level,
+          0 as messages,
+          0 as voice_time,
+          0 as coins
+        FROM users
+        WHERE user_id = ? AND guild_id = ?
       `;
       
       const stmt = db.prepare(query);
@@ -61,10 +69,10 @@ export class DatabaseService {
     const db = getDatabase();
     
     try {
-      // Try to get distinct servers from user_stats table
+      // Get distinct servers from users table
       const query = `
-        SELECT DISTINCT server_id as id
-        FROM user_stats
+        SELECT DISTINCT guild_id as id, guild_id as name
+        FROM users
       `;
       
       const stmt = db.prepare(query);
@@ -85,20 +93,19 @@ export class DatabaseService {
       const query = `
         SELECT 
           COUNT(DISTINCT user_id) as total_users,
-          SUM(messages) as total_messages,
-          SUM(exp) as total_exp
-        FROM user_stats
-        WHERE server_id = ?
+          SUM(xp) as total_exp
+        FROM users
+        WHERE guild_id = ?
       `;
       
       const stmt = db.prepare(query);
-      const result = stmt.get(serverId) as ServerStats;
+      const result = stmt.get(serverId) as any;
       
       return {
         total_users: result.total_users || 0,
-        total_messages: result.total_messages || 0,
+        total_messages: 0, // Not tracked in your bot
         total_exp: result.total_exp || 0,
-        active_users_today: 0, // Requires timestamp field
+        active_users_today: 0, // Not tracked in your bot
       };
     } catch (error) {
       console.error('Error fetching server stats:', error);
@@ -112,7 +119,7 @@ export class DatabaseService {
   }
 
   /**
-   * Search users by username
+   * Search users by user ID
    */
   static searchUsers(serverId: string, searchTerm: string): LeaderboardEntry[] {
     const db = getDatabase();
@@ -120,17 +127,17 @@ export class DatabaseService {
     try {
       const query = `
         SELECT 
-          ROW_NUMBER() OVER (ORDER BY exp DESC) as rank,
+          ROW_NUMBER() OVER (ORDER BY xp DESC) as rank,
           user_id,
-          username,
-          avatar,
-          exp,
+          user_id as username,
+          NULL as avatar,
+          xp as exp,
           level,
-          messages,
-          coins
-        FROM user_stats
-        WHERE server_id = ? AND username LIKE ?
-        ORDER BY exp DESC
+          0 as messages,
+          0 as coins
+        FROM users
+        WHERE guild_id = ? AND user_id LIKE ?
+        ORDER BY xp DESC
         LIMIT 50
       `;
       

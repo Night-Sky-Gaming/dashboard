@@ -10,11 +10,11 @@ export function getDatabase(): Database.Database {
     try {
       db = new Database(dbPath, { 
         readonly: true, // Read-only to prevent accidental modifications
-        fileMustExist: false 
+        fileMustExist: true 
       });
       
-      // Enable WAL mode for better concurrent access
-      db.pragma('journal_mode = WAL');
+      // Don't set WAL mode in readonly mode (causes error)
+      // WAL mode should be set by the bot when it creates/opens the database
       
       console.log(`Database connected at: ${dbPath}`);
     } catch (error) {

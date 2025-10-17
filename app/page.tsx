@@ -18,11 +18,26 @@ export default function DashboardPage() {
   const [selectedServer, setSelectedServer] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check if we're in the browser
+    if (typeof window === 'undefined') return;
+    
     const serverId = localStorage.getItem('selectedServer');
     if (serverId) {
       setSelectedServer(serverId);
       fetchStats(serverId);
+    } else {
+      setLoading(false);
     }
+
+    // Listen for server changes
+    const handleServerChange = (event: any) => {
+      const newServerId = event.detail;
+      setSelectedServer(newServerId);
+      fetchStats(newServerId);
+    };
+
+    window.addEventListener('serverChanged', handleServerChange);
+    return () => window.removeEventListener('serverChanged', handleServerChange);
   }, []);
 
   const fetchStats = async (serverId: string) => {
@@ -66,6 +81,18 @@ export default function DashboardPage() {
     );
   }
 
+  if (!selectedServer) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎮</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome to the Dashboard</h2>
+          <p className="text-gray-400">Please select a server from the dropdown above to view statistics.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -75,18 +102,12 @@ export default function DashboardPage() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard
               title="Total Users"
               value={stats.total_users}
               icon={Users}
               color="bg-discord-blurple bg-opacity-20 text-discord-blurple"
-            />
-            <StatCard
-              title="Total Messages"
-              value={stats.total_messages}
-              icon={MessageSquare}
-              color="bg-discord-green bg-opacity-20 text-discord-green"
             />
             <StatCard
               title="Total Experience"
@@ -95,8 +116,8 @@ export default function DashboardPage() {
               color="bg-discord-yellow bg-opacity-20 text-discord-yellow"
             />
             <StatCard
-              title="Active Today"
-              value={stats.active_users_today}
+              title="Average Level"
+              value={stats.total_users > 0 ? Math.floor(stats.total_exp / stats.total_users / 100) : 0}
               icon={Award}
               color="bg-discord-fuchsia bg-opacity-20 text-discord-fuchsia"
             />
@@ -107,9 +128,9 @@ export default function DashboardPage() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { name: 'Users', value: stats.total_users },
-                  { name: 'Messages', value: stats.total_messages / 1000 },
-                  { name: 'Experience', value: stats.total_exp / 10000 },
+                  { name: 'Total Users', value: stats.total_users },
+                  { name: 'Total XP (÷10k)', value: stats.total_exp / 10000 },
+                  { name: 'Avg Level', value: stats.total_users > 0 ? Math.floor(stats.total_exp / stats.total_users / 100) : 0 },
                 ]}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis dataKey="name" stroke="#9CA3AF" />
