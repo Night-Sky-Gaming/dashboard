@@ -6,7 +6,7 @@ A modern, responsive dashboard for the Andromeda Gaming Background bot built wit
 
 - 📊 **Real-time Statistics** - View server metrics, user counts, and activity
 - 🏆 **Leaderboard Display** - Sortable leaderboard with user rankings
-- 💾 **SQLite Integration** - Direct connection to your bot's database
+- 💾 **SQLite Integration** - Direct connection to the bot's database
 - 🎨 **Modern UI** - Discord-themed responsive interface
 - 🔄 **Server Selection** - Support for multiple servers
 - 📈 **Data Visualization** - Charts and graphs for better insights
@@ -47,11 +47,11 @@ Edit `.env` and configure:
 
 ```env
 # Path to the bot's SQLite database (absolute path recommended)
-DATABASE_PATH=C:/path/to/your/bot/leveling.db
+DATABASE_PATH=C:/path/to/the/bot/leveling.db
 
 # Discord Configuration
-DISCORD_CLIENT_ID=your_client_id_here
-DISCORD_CLIENT_SECRET=your_client_secret_here
+DISCORD_CLIENT_ID=the_client_id_here
+DISCORD_CLIENT_SECRET=the_client_secret_here
 NEXT_PUBLIC_DISCORD_BOT_NAME=Andromeda Gaming Background Bot
 ```
 
@@ -86,7 +86,7 @@ CREATE TABLE users (
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in the browser.
 
 **Production build:**
 ```bash
@@ -312,7 +312,7 @@ The server will run on port 3000 by default.
 
 ### No Data Showing
 
-1. **Check if bot has data:** Run your bot and have users gain XP
+1. **Check if bot has data:** Run the bot and have users gain XP
 2. **Verify table exists:** Open `leveling.db` in a SQLite browser
 3. **Select a server:** Click the dropdown in the header to choose a guild
 
@@ -326,7 +326,7 @@ If you still see this:
 
 ### TypeScript Errors
 
-Run `npm install` to ensure all dependencies are installed, then restart your editor.
+Run `npm install` to ensure all dependencies are installed, then restart the editor.
 
 ### Build Warnings
 
@@ -338,7 +338,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License - feel free to use this dashboard for your Discord bot!
+MIT License - feel free to use this dashboard for the Discord bot!
 
 ## Support
 
