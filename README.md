@@ -47,21 +47,35 @@ Edit `.env` and configure:
 
 ```env
 # Path to the bot's SQLite database (absolute path recommended)
-DATABASE_PATH=C:/path/to/the/bot/leveling.db
+DATABASE_PATH=/path/to/the/bot/leveling.db
 
 # Discord Configuration
 DISCORD_CLIENT_ID=the_client_id_here
 DISCORD_CLIENT_SECRET=the_client_secret_here
+DISCORD_BOT_TOKEN=your_bot_token_here
+DISCORD_API_ENABLED=false
 NEXT_PUBLIC_DISCORD_BOT_NAME=Andromeda Gaming Background Bot
 ```
 
 > **Important:** Use an absolute path for `DATABASE_PATH` to avoid connection issues. The dashboard connects in **read-only mode** to safely access the bot's database without interfering with bot operations.
+
+> ⚠️ **Known Issue - Discord Names:** Currently, Discord API integration for fetching real server and user names is disabled (`DISCORD_API_ENABLED=false`). When enabled, the Discord REST API calls were causing the dashboard to hang because bot tokens don't have the necessary OAuth2 scopes to fetch user/guild information. As a workaround, the dashboard displays:
+>
+> - Servers as: `Server 1425595783...` (truncated server ID)
+> - Users as: `User 10849180` (truncated user ID)
+>
+> **Future Solutions:**
+>
+> - Store usernames and server names directly in the bot's database when users gain XP
+> - Implement Discord OAuth2 authentication with proper scopes
+> - Create a custom API endpoint in the bot to fetch names via Discord.js client
 
 ### Database Schema
 
 This dashboard is configured for the **Andromeda Gaming Background bot** database structure:
 
 **users table:**
+
 ```sql
 CREATE TABLE users (
   id TEXT PRIMARY KEY,
@@ -75,6 +89,7 @@ CREATE TABLE users (
 ```
 
 **Key Features:**
+
 - Tracks user XP and levels per guild
 - Uses the formula: `level = floor(0.1 * sqrt(xp)) + 1`
 - Read-only access to prevent conflicts with the bot
@@ -82,6 +97,7 @@ CREATE TABLE users (
 ### Running the Dashboard
 
 **Development mode:**
+
 ```bash
 npm run dev
 ```
@@ -89,6 +105,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) in the browser.
 
 **Production build:**
+
 ```bash
 npm run build
 npm start
@@ -138,6 +155,7 @@ The dashboard queries are configured for the bot's schema:
 **Columns:** `user_id`, `guild_id`, `xp`, `level`, `last_message`
 
 Query implementations in `lib/database/queries.ts`:
+
 - `getLeaderboard()` - Orders by `xp DESC` for guild ranking
 - `getUserStats()` - Fetches user data by `user_id` and `guild_id`
 - `getServers()` - Gets distinct `guild_id` values
@@ -163,10 +181,11 @@ colors: {
 The dashboard uses the following leveling formula:
 
 ```javascript
-level = Math.floor(0.1 * Math.sqrt(xp)) + 1
+level = Math.floor(0.1 * Math.sqrt(xp)) + 1;
 ```
 
 **XP Requirements:**
+
 - Level 1: 0 XP
 - Level 2: 100 XP
 - Level 3: 400 XP
@@ -178,66 +197,76 @@ The formula is implemented in `lib/utils.ts` in the `calculateLevelProgress()` f
 ## API Endpoints
 
 ### GET `/api/leaderboard`
+
 Fetch leaderboard data for the guild.
 
 **Query Parameters:**
+
 - `serverId` (required) - Discord guild ID
 - `limit` (optional) - Number of users to return (default: 100)
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "data": [
-    {
-      "rank": 1,
-      "user_id": "123456789",
-      "xp": 15000,
-      "level": 25
-    }
-  ]
+	"success": true,
+	"data": [
+		{
+			"rank": 1,
+			"user_id": "123456789",
+			"xp": 15000,
+			"level": 25
+		}
+	]
 }
 ```
 
 ### GET `/api/users`
+
 Get user statistics for a specific guild.
 
 **Query Parameters:**
+
 - `userId` (required) - Discord user ID
 - `serverId` (required) - Discord guild ID
 
 ### GET `/api/servers`
+
 List all guilds in the database.
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "data": [
-    {
-      "id": "987654321",
-      "name": "987654321"
-    }
-  ]
+	"success": true,
+	"data": [
+		{
+			"id": "987654321",
+			"name": "987654321"
+		}
+	]
 }
 ```
 
 ### GET `/api/servers/stats`
+
 Get aggregated statistics for a specific guild.
 
 **Query Parameters:**
+
 - `serverId` (required) - Discord guild ID
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "data": {
-    "total_users": 150,
-    "total_exp": 1500000,
-    "total_messages": 0,
-    "active_users_today": 0
-  }
+	"success": true,
+	"data": {
+		"total_users": 150,
+		"total_exp": 1500000,
+		"total_messages": 0,
+		"active_users_today": 0
+	}
 }
 ```
 
@@ -251,12 +280,14 @@ This dashboard is specifically configured for **Andromeda Gaming**:
 4. **Select a guild:** Use the dropdown in the header to choose a server
 
 **Database Connection Details:**
+
 - Connects in **read-only mode** (safe to run alongside the bot)
 - No writes to the database (prevents conflicts)
 - Automatically handles WAL mode if enabled by the bot
 - Queries the `users` table with `guild_id` and `xp` columns
 
 **Troubleshooting:**
+
 - If you see "Database connection failed", verify the `DATABASE_PATH` is correct
 - Ensure the bot has created the database file (run the bot at least once)
 - Check that the path uses forward slashes (/) even on Windows
@@ -280,6 +311,7 @@ The server will run on port 3000 by default.
 ## Future Enhancements
 
 **Dashboard Improvements:**
+
 - [ ] Discord OAuth2 authentication
 - [ ] Real-time updates with WebSockets
 - [ ] User profile pages with detailed stats
@@ -288,6 +320,7 @@ The server will run on port 3000 by default.
 - [ ] Export data to CSV/JSON
 
 **Bot Integration (requires bot updates):**
+
 - [ ] Store usernames for better display
 - [ ] Track message counts
 - [ ] Store avatar hashes
@@ -300,12 +333,14 @@ The server will run on port 3000 by default.
 ### Database Connection Issues
 
 **Error:** "Database connection failed"
+
 - ✅ Verify `DATABASE_PATH` in `.env` points to `leveling.db`
 - ✅ Use absolute path (e.g., `C:/Users/Name/bot/leveling.db`)
 - ✅ Ensure bot has created the database (run bot at least once)
 - ✅ Check file permissions (readable by the dashboard)
 
 **Error:** "attempt to write a readonly database"
+
 - This was fixed in the latest version
 - Ensure you have the updated `lib/database/connection.ts`
 - The dashboard no longer tries to set WAL mode
@@ -320,6 +355,7 @@ The server will run on port 3000 by default.
 
 This was fixed in the latest version with event-based server switching.
 If you still see this:
+
 1. Clear browser cache
 2. Rebuild: `npm run build`
 3. Restart: `npm start`

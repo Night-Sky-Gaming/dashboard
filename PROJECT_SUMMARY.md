@@ -7,6 +7,7 @@ Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfull
 ## 🎯 Features Implemented
 
 ### 1. ✅ Leaderboard Display
+
 - **Location**: `app/leaderboard/page.tsx`
 - Real-time leaderboard with user rankings
 - Search functionality to filter users
@@ -14,6 +15,7 @@ Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfull
 - Displays: rank, avatar, username, level, experience, messages, coins
 
 ### 2. ✅ SQLite Database Connection
+
 - **Location**: `lib/database/connection.ts` & `lib/database/queries.ts`
 - Read-only connection to prevent data corruption
 - Database service with query methods
@@ -21,6 +23,7 @@ Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfull
 - WAL mode enabled for concurrent access
 
 ### 3. ✅ User Statistics
+
 - **Location**: `app/page.tsx` (Dashboard)
 - Total users, messages, and experience tracking
 - Active users counter
@@ -28,6 +31,7 @@ Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfull
 - Visual statistics cards with icons
 
 ### 4. ✅ Modern, Responsive UI
+
 - **Framework**: Next.js 14 + TypeScript + Tailwind CSS
 - Discord-themed color palette
 - Fully responsive design (mobile, tablet, desktop)
@@ -35,6 +39,7 @@ Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfull
 - Professional component library
 
 ### 5. ✅ Server Selection
+
 - **Location**: `components/ServerSelector.tsx`
 - Dropdown selector in header
 - Automatic server detection from database
@@ -104,22 +109,27 @@ dashboard/
 ## 🚀 Getting Started
 
 ### Installation
+
 ```bash
 npm install
 ```
 
 ### Configuration
+
 1. Copy `.env.example` to `.env`
-2. Set `DATABASE_PATH` to your bot's SQLite database
-3. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` with your bot name
+2. Set `DATABASE_PATH` to the bot's SQLite database
+3. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` with the bot name
 
 ### Run Development Server
+
 ```bash
 npm run dev
 ```
+
 Visit: http://localhost:3000
 
 ### Production Build
+
 ```bash
 npm run build
 npm start
@@ -127,22 +137,24 @@ npm start
 
 ## 🔌 API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/leaderboard?serverId={id}&limit={n}` | GET | Fetch server leaderboard |
-| `/api/users?userId={id}&serverId={id}` | GET | Get user statistics |
-| `/api/servers` | GET | List all servers |
-| `/api/servers/stats?serverId={id}` | GET | Get server statistics |
+| Endpoint                                   | Method | Description              |
+| ------------------------------------------ | ------ | ------------------------ |
+| `/api/leaderboard?serverId={id}&limit={n}` | GET    | Fetch server leaderboard |
+| `/api/users?userId={id}&serverId={id}`     | GET    | Get user statistics      |
+| `/api/servers`                             | GET    | List all servers         |
+| `/api/servers/stats?serverId={id}`         | GET    | Get server statistics    |
 
 ## 🎨 Pages
 
 1. **Dashboard** (`/`)
+
    - Server overview statistics
    - User count, message count, total XP
    - Bar chart visualization
    - Active users today counter
 
 2. **Leaderboard** (`/leaderboard`)
+
    - Top 100 users by experience
    - Search functionality
    - Medal icons for top 3
@@ -159,18 +171,23 @@ npm start
 ## 🔧 Customization Points
 
 ### Database Schema
-Update `lib/database/queries.ts` if your bot's database differs:
+
+Update `lib/database/queries.ts` if the bot's database differs:
+
 - Table names
 - Column names
 - Query logic
 
 ### Leveling Formula
-Modify `lib/utils.ts` → `calculateLevelProgress()` to match your bot's formula
+
+Modify `lib/utils.ts` → `calculateLevelProgress()` to match the bot's formula
 
 ### Colors
+
 Edit `tailwind.config.js` → `theme.extend.colors.discord` for custom branding
 
 ### Layout
+
 Adjust `app/layout.tsx` for sidebar position or header style
 
 ## 📝 Environment Variables
@@ -214,6 +231,7 @@ CREATE TABLE user_stats (
 ## 🔜 Future Enhancements
 
 Potential features to add:
+
 - [ ] Discord OAuth2 authentication
 - [ ] User profile pages
 - [ ] Command usage statistics
@@ -227,27 +245,33 @@ Potential features to add:
 ## 🐛 Troubleshooting
 
 ### TypeScript Errors
+
 These are expected before `npm install`. Run:
+
 ```bash
 npm install
 ```
 
 ### Database Connection Failed
+
 1. Check `DATABASE_PATH` in `.env`
 2. Verify file exists and is readable
 3. Ensure it's a valid SQLite database
 
 ### No Data Showing
+
 1. Verify table/column names match in `lib/database/queries.ts`
 2. Check database has data
 3. Confirm server IDs match
 
 ### Port Already in Use
+
 Change port in package.json or kill process on port 3000
 
 ## 📦 Dependencies
 
 ### Production
+
 - next: ^14.2.0
 - react: ^18.3.1
 - react-dom: ^18.3.1
@@ -258,6 +282,7 @@ Change port in package.json or kill process on port 3000
 - tailwind-merge: ^2.3.0
 
 ### Development
+
 - typescript: ^5.4.0
 - tailwindcss: ^3.4.0
 - @types/node: ^20.14.0
