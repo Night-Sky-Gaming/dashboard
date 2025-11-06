@@ -12,6 +12,9 @@ export default function LeaderboardPage() {
 	const [selectedServer, setSelectedServer] = useState<string | null>(null);
 
 	useEffect(() => {
+		// Hardcoded for Andromeda Gaming server
+		// Uncomment for multi-server support:
+		/*
 		// Check if we're in the browser
 		if (typeof window === "undefined") return;
 
@@ -34,6 +37,12 @@ export default function LeaderboardPage() {
 		window.addEventListener("serverChanged", handleServerChange);
 		return () =>
 			window.removeEventListener("serverChanged", handleServerChange);
+		*/
+		
+		// For now, use hardcoded server ID (Andromeda Gaming)
+		const hardcodedServerId = "1425595783952203829";
+		setSelectedServer(hardcodedServerId);
+		fetchLeaderboard(hardcodedServerId);
 	}, []);
 
 	const fetchLeaderboard = async (serverId: string) => {

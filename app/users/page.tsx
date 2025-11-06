@@ -24,6 +24,9 @@ export default function UsersPage() {
 	const usersPerPage = 50;
 
 	useEffect(() => {
+		// Hardcoded for Andromeda Gaming server
+		// Uncomment for multi-server support:
+		/*
 		if (typeof window === "undefined") return;
 
 		const serverId = localStorage.getItem("selectedServer");
@@ -44,6 +47,12 @@ export default function UsersPage() {
 		window.addEventListener("serverChanged", handleServerChange);
 		return () =>
 			window.removeEventListener("serverChanged", handleServerChange);
+		*/
+		
+		// For now, use hardcoded server ID (Andromeda Gaming)
+		const hardcodedServerId = "1425595783952203829";
+		setSelectedServer(hardcodedServerId);
+		fetchUsers(hardcodedServerId, 1);
 	}, []);
 
 	const fetchUsers = async (serverId: string, page: number) => {

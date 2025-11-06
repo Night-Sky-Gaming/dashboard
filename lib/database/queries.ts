@@ -225,4 +225,101 @@ export class DatabaseService {
 			return { users: [], total: 0 };
 		}
 	}
+
+	/**
+	 * Get comprehensive statistics for a server
+	 */
+	static getDetailedStatistics(serverId: string) {
+		const db = getDatabase();
+
+		try {
+			// Get level distribution
+			const levelDistQuery = `
+        SELECT 
+          level,
+          COUNT(*) as count
+        FROM users
+        WHERE guild_id = ?
+        GROUP BY level
+        ORDER BY level ASC
+      `;
+			const levelDistStmt = db.prepare(levelDistQuery);
+			const levelDistribution = levelDistStmt.all(serverId) as Array<{
+				level: number;
+				count: number;
+			}>;
+
+			// Get top performers
+			const topPerformersQuery = `
+        SELECT 
+          user_id,
+          user_id as username,
+          xp as exp,
+          level
+        FROM users
+        WHERE guild_id = ?
+        ORDER BY xp DESC
+        LIMIT 10
+      `;
+			const topPerformersStmt = db.prepare(topPerformersQuery);
+			const topPerformers = topPerformersStmt.all(serverId) as Array<{
+				user_id: string;
+				username: string;
+				exp: number;
+				level: number;
+			}>;
+
+			// Format top performers with shortened user IDs
+			const formattedTopPerformers = topPerformers.map((user) => ({
+				...user,
+				username: `User ${user.user_id.slice(0, 8)}`,
+			}));
+
+			// Get average level
+			const avgLevelQuery = `
+        SELECT AVG(level) as avg_level
+        FROM users
+        WHERE guild_id = ?
+      `;
+			const avgLevelStmt = db.prepare(avgLevelQuery);
+			const avgLevelResult = avgLevelStmt.get(serverId) as {
+				avg_level: number;
+			};
+
+			// Get total voice time
+			const voiceTimeQuery = `
+        SELECT SUM(voice_total_time) as total_voice_time
+        FROM users
+        WHERE guild_id = ?
+      `;
+			const voiceTimeStmt = db.prepare(voiceTimeQuery);
+			const voiceTimeResult = voiceTimeStmt.get(serverId) as {
+				total_voice_time: number;
+			};
+
+			// Get recent activity (simulated for now)
+			const recentActivity: Array<{
+				date: string;
+				users_active: number;
+				exp_gained: number;
+			}> = [];
+
+			return {
+				levelDistribution,
+				topPerformers: formattedTopPerformers,
+				averageLevel: avgLevelResult.avg_level || 0,
+				totalVoiceTime: voiceTimeResult.total_voice_time || 0,
+				recentActivity,
+			};
+		} catch (error) {
+			console.error("Error fetching detailed statistics:", error);
+			return {
+				levelDistribution: [],
+				topPerformers: [],
+				averageLevel: 0,
+				totalVoiceTime: 0,
+				recentActivity: [],
+			};
+		}
+	}
 }

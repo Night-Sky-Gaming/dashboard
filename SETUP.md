@@ -102,10 +102,33 @@ The dashboard is specifically configured for this schema.
 ## 🎨 Pages Overview
 
 1. **Dashboard** (`/`) - Server statistics overview with total users and XP
-2. **Leaderboard** (`/leaderboard`) - Top users ranked by experience
+2. **Leaderboard** (`/leaderboard`) - Top users ranked by experience with search
 3. **Users** (`/users`) - Complete user directory with pagination (50 users per page)
+4. **Statistics** (`/stats`) - Detailed analytics with level distribution, top performers, and charts
+5. **Settings** (`/settings`) - Bot configuration interface (demonstration only - see SETTINGS_INTEGRATION.md)
 
-All pages feature search functionality and real-time data from the bot's database.
+All pages are hardcoded to use Andromeda Gaming's guild ID: `1425595783952203829`
+
+---
+
+## 🆕 New Features
+
+### Functional Notifications
+- Click the bell icon in the header
+- View demo notifications with mark as read/delete functionality
+- **Note**: Not connected to real bot events yet
+
+### Statistics Dashboard
+- Level distribution visualisation
+- Top 10 performers by XP
+- Average level and total voice time
+- Comprehensive server analytics
+
+### Settings Page
+- XP rate multipliers (text and voice)
+- Level-up notification configuration
+- Auto role reward settings
+- **Warning**: Settings are stored in-memory only and don't affect the bot
 
 ---
 
@@ -127,7 +150,14 @@ All pages feature search functionality and real-time data from the bot's databas
 **Issue: "Server/User names showing as IDs"**
 
 - Expected behavior: This is normal with `DISCORD_API_ENABLED=false`
-- Shows truncated IDs like "Server 1425595783..." and "User 10849180"
+- Server name is hardcoded to "Andromeda Gaming" in header
+- Users show as truncated IDs like "User 10849180"
+
+**Issue: "Settings don't save after restart"**
+
+- Expected behavior: Settings are stored in-memory only (demonstration)
+- Changes are lost when server restarts
+- See `SETTINGS_INTEGRATION.md` for how to implement persistent settings
 
 **Issue: TypeScript errors**
 
@@ -142,28 +172,33 @@ All pages feature search functionality and real-time data from the bot's databas
 ✅ Tailwind CSS with Discord theme
 ✅ SQLite database integration (read-only mode)
 ✅ Responsive design for mobile and desktop
-✅ Server selection dropdown
+✅ Hardcoded single server mode (Andromeda Gaming)
 ✅ Leaderboard with search and rankings
 ✅ Complete users page with pagination
-✅ Statistics dashboard with XP/level tracking
+✅ Statistics dashboard with charts and analytics
+✅ Settings page (demonstration only)
+✅ Functional notification system (demo notifications)
 ✅ Voice time tracking display
 ✅ Reusable UI components
+✅ Level distribution visualization
 
 ---
 
 ## 🔜 Next Steps
 
 1. Run `npm install` to install dependencies
-2. Copy `.env.example` to `.env` and configure your database path
-3. Add your `DISCORD_BOT_TOKEN` (from config.json)
+2. Copy `.env.example` to `.env` and configure the database path
+3. Add the `DISCORD_BOT_TOKEN` (from config.json)
 4. Set `DISCORD_API_ENABLED=false`
 5. Run `npm run dev` and visit http://localhost:3000
-6. Select your server from the dropdown to view data
+6. Data will automatically load for Andromeda Gaming server
 
 **Optional Improvements:**
 
 - Add username/server name columns to the bot's database for better display
 - Implement custom API endpoint in the bot for fetching Discord names
+- Integrate settings with bot (see SETTINGS_INTEGRATION.md)
+- Connect notifications to real bot events
 - Add more statistics and data visualizations
 
 Need help? Check the main README.md for detailed documentation.

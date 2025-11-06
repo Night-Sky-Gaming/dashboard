@@ -2,49 +2,84 @@
 
 ## ✅ Completed Setup
 
-Your Next.js dashboard for the Andromeda Gaming Discord bot has been successfully set up with all requested features!
+The Next.js dashboard for the Andromeda Gaming Discord bot has been successfully set up with all requested features!
 
 ## 🎯 Features Implemented
 
-### 1. ✅ Leaderboard Display
+### 1. ✅ Dashboard Home Page
+
+- **Location**: `app/page.tsx`
+- Server overview with key statistics
+- Total users, XP, and activity metrics
+- Modern card-based layout with icons
+
+### 2. ✅ Leaderboard Display
 
 - **Location**: `app/leaderboard/page.tsx`
 - Real-time leaderboard with user rankings
 - Search functionality to filter users
 - Medal icons for top 3 positions
-- Displays: rank, avatar, username, level, experience, messages, coins
+- Displays: rank, username (ID), level, experience
 
-### 2. ✅ SQLite Database Connection
+### 3. ✅ Users Directory
+
+- **Location**: `app/users/page.tsx`
+- Complete user list with pagination (50 per page)
+- Search users by ID
+- Voice time tracking display
+- Level and XP information per user
+
+### 4. ✅ Statistics Dashboard
+
+- **Location**: `app/stats/page.tsx`
+- Comprehensive server analytics
+- Level distribution visualization with bar charts
+- Top 10 performers by XP
+- Average level calculation
+- Total voice time tracking
+
+### 5. ✅ Settings Page
+
+- **Location**: `app/settings/page.tsx`
+- Bot configuration interface (demonstration only)
+- XP rate multipliers (text and voice)
+- Level-up notification settings
+- Auto role reward configuration
+- Warning: Settings are stored in-memory only and don't affect the bot
+- See `SETTINGS_INTEGRATION.md` for implementation guide
+
+### 6. ✅ Functional Notifications
+
+- **Location**: `components/layout/Header.tsx`
+- Clickable bell icon with dropdown
+- Unread notification counter
+- Mark as read / Mark all as read functionality
+- Delete individual notifications
+- Color-coded notification types (success, info, warning)
+- Demo notifications (not connected to real events yet)
+
+### 7. ✅ SQLite Database Connection
 
 - **Location**: `lib/database/connection.ts` & `lib/database/queries.ts`
 - Read-only connection to prevent data corruption
 - Database service with query methods
 - Support for custom database schemas
-- WAL mode enabled for concurrent access
+- WAL mode compatible
 
-### 3. ✅ User Statistics
+### 8. ✅ Hardcoded Single Server
 
-- **Location**: `app/page.tsx` (Dashboard)
-- Total users, messages, and experience tracking
-- Active users counter
-- User profile data retrieval
-- Visual statistics cards with icons
+- Server name: "Andromeda Gaming" displayed in header
+- Guild ID: `1425595783952203829` (hardcoded)
+- All multi-server code preserved in comments for future use
+- Easy to re-enable for multiple servers
 
-### 4. ✅ Modern, Responsive UI
+### 9. ✅ Modern, Responsive UI
 
 - **Framework**: Next.js 14 + TypeScript + Tailwind CSS
 - Discord-themed color palette
 - Fully responsive design (mobile, tablet, desktop)
 - Smooth animations and transitions
 - Professional component library
-
-### 5. ✅ Server Selection
-
-- **Location**: `components/ServerSelector.tsx`
-- Dropdown selector in header
-- Automatic server detection from database
-- Persistent selection across pages
-- Visual server indicators
 
 ## 📁 Project Structure
 
@@ -67,21 +102,29 @@ dashboard/
 │   │   ├── globals.css       # Global styles
 │   │   ├── leaderboard/
 │   │   │   └── page.tsx      # Leaderboard page
+│   │   ├── users/
+│   │   │   └── page.tsx      # Users directory page
+│   │   ├── stats/
+│   │   │   └── page.tsx      # Statistics dashboard
+│   │   ├── settings/
+│   │   │   └── page.tsx      # Settings configuration
 │   │   └── api/
 │   │       ├── leaderboard/route.ts    # Leaderboard API
 │   │       ├── servers/route.ts        # Servers list API
 │   │       ├── servers/stats/route.ts  # Server stats API
-│   │       └── users/route.ts          # User stats API
+│   │       ├── users/route.ts          # User stats API
+│   │       ├── stats/route.ts          # Detailed statistics API
+│   │       └── settings/route.ts       # Settings get/save API
 │
 ├── 🧩 Components
 │   ├── components/
 │   │   ├── layout/
-│   │   │   ├── Header.tsx         # Top navigation bar
+│   │   │   ├── Header.tsx         # Navigation with notifications
 │   │   │   └── Sidebar.tsx        # Side navigation menu
 │   │   ├── ui/
 │   │   │   ├── Button.tsx         # Button component
 │   │   │   └── Card.tsx           # Card components
-│   │   └── ServerSelector.tsx     # Server dropdown
+│   │   └── ServerSelector.tsx     # Server dropdown (unused)
 │
 ├── 📚 Library (Utils & Database)
 │   ├── lib/
@@ -93,8 +136,10 @@ dashboard/
 │   │   └── utils.ts            # Helper functions
 │
 └── 📖 Documentation
-    ├── README.md              # Full documentation
-    └── SETUP.md              # Quick setup guide
+    ├── README.md                  # Full documentation
+    ├── PROJECT_SUMMARY.md         # This file
+    ├── SETUP.md                   # Quick setup guide
+    └── SETTINGS_INTEGRATION.md    # Settings implementation guide
 ```
 
 ## 🛠️ Tech Stack
@@ -102,7 +147,6 @@ dashboard/
 - **Frontend**: Next.js 14 (App Router), React 18, TypeScript
 - **Styling**: Tailwind CSS with Discord theme
 - **Database**: better-sqlite3
-- **Charts**: Recharts for data visualization
 - **Icons**: Lucide React
 - **Utilities**: clsx, tailwind-merge
 
@@ -117,8 +161,9 @@ npm install
 ### Configuration
 
 1. Copy `.env.example` to `.env`
-2. Set `DATABASE_PATH` to the bot's SQLite database
-3. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` with the bot name
+2. Set `DATABASE_PATH` to the bot's SQLite database (absolute path)
+3. Set `DISCORD_API_ENABLED=false` (required)
+4. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` if desired
 
 ### Run Development Server
 
@@ -137,36 +182,65 @@ npm start
 
 ## 🔌 API Endpoints
 
-| Endpoint                                   | Method | Description              |
-| ------------------------------------------ | ------ | ------------------------ |
-| `/api/leaderboard?serverId={id}&limit={n}` | GET    | Fetch server leaderboard |
-| `/api/users?userId={id}&serverId={id}`     | GET    | Get user statistics      |
-| `/api/servers`                             | GET    | List all servers         |
-| `/api/servers/stats?serverId={id}`         | GET    | Get server statistics    |
+| Endpoint                                   | Method | Description                      |
+| ------------------------------------------ | ------ | -------------------------------- |
+| `/api/leaderboard?serverId={id}&limit={n}` | GET    | Fetch server leaderboard         |
+| `/api/users?userId={id}&serverId={id}`     | GET    | Get user statistics              |
+| `/api/servers`                             | GET    | List all servers                 |
+| `/api/servers/stats?serverId={id}`         | GET    | Get server statistics            |
+| `/api/stats?serverId={id}`                 | GET    | Get detailed statistics & charts |
+| `/api/settings?serverId={id}`              | GET    | Get server settings (demo)       |
+| `/api/settings`                            | POST   | Save settings (in-memory only)   |
 
 ## 🎨 Pages
 
 1. **Dashboard** (`/`)
 
    - Server overview statistics
-   - User count, message count, total XP
-   - Bar chart visualization
-   - Active users today counter
+   - User count, total XP
+   - Quick links to other sections
 
 2. **Leaderboard** (`/leaderboard`)
 
    - Top 100 users by experience
    - Search functionality
    - Medal icons for top 3
-   - Sortable columns
-   - User avatars from Discord CDN
+   - Real-time data from database
 
-3. **Sidebar Navigation**
+3. **Users** (`/users`)
+
+   - Complete user directory
+   - Pagination (50 users per page)
+   - Search by user ID
+   - Voice time and XP display
+
+4. **Statistics** (`/stats`)
+
+   - Level distribution charts
+   - Top 10 performers
+   - Average level calculation
+   - Total voice time
+   - Comprehensive server analytics
+
+5. **Settings** (`/settings`)
+
+   - Bot configuration UI
+   - XP rate multipliers
+   - Level-up notifications
+   - Auto role rewards
+   - **Note**: Demo only - doesn't affect bot
+
+6. **Sidebar Navigation**
    - Dashboard
    - Leaderboard
-   - Users (placeholder)
-   - Statistics (placeholder)
-   - Settings (placeholder)
+   - Users
+   - Statistics
+   - Settings
+
+7. **Header Navigation**
+   - Andromeda Gaming server display
+   - Functional notification bell with dropdown
+   - Mark as read / delete notifications
 
 ## 🔧 Customization Points
 
@@ -233,14 +307,16 @@ CREATE TABLE user_stats (
 Potential features to add:
 
 - [ ] Discord OAuth2 authentication
-- [ ] User profile pages
+- [ ] User profile pages with detailed history
 - [ ] Command usage statistics
 - [ ] Real-time updates (WebSockets)
-- [ ] Admin panel for server management
+- [ ] Actual settings integration with bot (see SETTINGS_INTEGRATION.md)
+- [ ] Real notification system connected to bot events
 - [ ] Data export (CSV/JSON)
 - [ ] Advanced filtering and sorting
-- [ ] Date range selection
-- [ ] More chart types
+- [ ] Date range selection for statistics
+- [ ] More chart types and visualizations
+- [ ] Multi-server support (code ready, just needs uncommenting)
 
 ## 🐛 Troubleshooting
 
@@ -257,16 +333,22 @@ npm install
 1. Check `DATABASE_PATH` in `.env`
 2. Verify file exists and is readable
 3. Ensure it's a valid SQLite database
+4. Use absolute path (e.g., `C:/Users/Name/bot/leveling.db`)
 
 ### No Data Showing
 
 1. Verify table/column names match in `lib/database/queries.ts`
 2. Check database has data
-3. Confirm server IDs match
+3. Confirm the hardcoded guild ID `1425595783952203829` matches the database
+4. Run: `SELECT * FROM users WHERE guild_id = '1425595783952203829' LIMIT 5;`
 
 ### Port Already in Use
 
 Change port in package.json or kill process on port 3000
+
+### Settings Don't Work
+
+This is expected - settings are for demonstration only. See `SETTINGS_INTEGRATION.md` for implementation guide.
 
 ## 📦 Dependencies
 
