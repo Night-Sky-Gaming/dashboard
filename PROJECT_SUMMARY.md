@@ -19,15 +19,17 @@ The Next.js dashboard for the Andromeda Gaming Discord bot has been successfully
 - Real-time leaderboard with user rankings
 - Search functionality to filter users
 - Medal icons for top 3 positions
-- Displays: rank, username (ID), level, experience
+- Displays: rank, Discord username, level, experience
+- Fetches real usernames from Discord API
 
 ### 3. ✅ Users Directory
 
 - **Location**: `app/users/page.tsx`
 - Complete user list with pagination (50 per page)
-- Search users by ID
+- Search users by username or ID
 - Voice time tracking display
 - Level and XP information per user
+- Real Discord usernames and avatars
 
 ### 4. ✅ Statistics Dashboard
 
@@ -66,14 +68,24 @@ The Next.js dashboard for the Andromeda Gaming Discord bot has been successfully
 - Support for custom database schemas
 - WAL mode compatible
 
-### 8. ✅ Hardcoded Single Server
+### 8. ✅ Discord API Integration
+
+- **Location**: `lib/discord.ts`
+- Fetches real Discord usernames and avatars
+- Uses Guild Member API endpoint (works with bot tokens!)
+- 30-minute caching to reduce API calls
+- Batch processing with rate limiting
+- Requires Server Members Intent enabled
+- See `DISCORD_API_SETUP.md` for setup instructions
+
+### 9. ✅ Hardcoded Single Server
 
 - Server name: "Andromeda Gaming" displayed in header
 - Guild ID: `1425595783952203829` (hardcoded)
 - All multi-server code preserved in comments for future use
 - Easy to re-enable for multiple servers
 
-### 9. ✅ Modern, Responsive UI
+### 10. ✅ Modern, Responsive UI
 
 - **Framework**: Next.js 14 + TypeScript + Tailwind CSS
 - Discord-themed color palette
@@ -133,13 +145,15 @@ dashboard/
 │   │   │   └── queries.ts      # Database queries
 │   │   ├── types/
 │   │   │   └── database.ts     # TypeScript types
+│   │   ├── discord.ts          # Discord API utilities
 │   │   └── utils.ts            # Helper functions
 │
 └── 📖 Documentation
-    ├── README.md                  # Full documentation
-    ├── PROJECT_SUMMARY.md         # This file
-    ├── SETUP.md                   # Quick setup guide
-    └── SETTINGS_INTEGRATION.md    # Settings implementation guide
+    ├── README.md                      # Full documentation
+    ├── PROJECT_SUMMARY.md             # This file
+    ├── SETUP.md                       # Quick setup guide
+    ├── SETTINGS_INTEGRATION.md        # Settings implementation guide
+    └── DISCORD_API_SETUP.md           # Discord API setup guide
 ```
 
 ## 🛠️ Tech Stack
@@ -147,6 +161,7 @@ dashboard/
 - **Frontend**: Next.js 14 (App Router), React 18, TypeScript
 - **Styling**: Tailwind CSS with Discord theme
 - **Database**: better-sqlite3
+- **API**: Discord REST API (Guild Members endpoint)
 - **Icons**: Lucide React
 - **Utilities**: clsx, tailwind-merge
 
@@ -160,10 +175,14 @@ npm install
 
 ### Configuration
 
-1. Copy `.env.example` to `.env`
+1. Copy `.env.example` to `.env.local`
 2. Set `DATABASE_PATH` to the bot's SQLite database (absolute path)
-3. Set `DISCORD_API_ENABLED=false` (required)
-4. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` if desired
+3. Add `DISCORD_BOT_TOKEN` from Discord Developer Portal
+4. Set `DISCORD_API_ENABLED=true` to fetch real usernames
+5. Enable **Server Members Intent** in Discord Developer Portal
+6. Update `NEXT_PUBLIC_DISCORD_BOT_NAME` if desired
+
+See `DISCORD_API_SETUP.md` for detailed Discord API setup instructions.
 
 ### Run Development Server
 
@@ -182,15 +201,17 @@ npm start
 
 ## 🔌 API Endpoints
 
-| Endpoint                                   | Method | Description                      |
-| ------------------------------------------ | ------ | -------------------------------- |
-| `/api/leaderboard?serverId={id}&limit={n}` | GET    | Fetch server leaderboard         |
-| `/api/users?userId={id}&serverId={id}`     | GET    | Get user statistics              |
-| `/api/servers`                             | GET    | List all servers                 |
-| `/api/servers/stats?serverId={id}`         | GET    | Get server statistics            |
-| `/api/stats?serverId={id}`                 | GET    | Get detailed statistics & charts |
-| `/api/settings?serverId={id}`              | GET    | Get server settings (demo)       |
-| `/api/settings`                            | POST   | Save settings (in-memory only)   |
+| Endpoint                                   | Method | Description                           |
+| ------------------------------------------ | ------ | ------------------------------------- |
+| `/api/leaderboard?serverId={id}&limit={n}` | GET    | Fetch server leaderboard + usernames  |
+| `/api/users?userId={id}&serverId={id}`     | GET    | Get user statistics + Discord data    |
+| `/api/servers`                             | GET    | List all servers                      |
+| `/api/servers/stats?serverId={id}`         | GET    | Get server statistics                 |
+| `/api/stats?serverId={id}`                 | GET    | Get detailed statistics & charts      |
+| `/api/settings?serverId={id}`              | GET    | Get server settings (demo)            |
+| `/api/settings`                            | POST   | Save settings (in-memory only)        |
+
+**Note:** Leaderboard and Users endpoints automatically fetch Discord usernames/avatars when `DISCORD_API_ENABLED=true`.
 
 ## 🎨 Pages
 
@@ -205,14 +226,16 @@ npm start
    - Top 100 users by experience
    - Search functionality
    - Medal icons for top 3
+   - Real Discord usernames and avatars
    - Real-time data from database
 
 3. **Users** (`/users`)
 
    - Complete user directory
    - Pagination (50 users per page)
-   - Search by user ID
+   - Search by username or user ID
    - Voice time and XP display
+   - Real Discord usernames and avatars
 
 4. **Statistics** (`/stats`)
 
@@ -282,25 +305,34 @@ NEXTAUTH_SECRET=your_secret                        # Auth secret (future)
 - **WAL Mode**: Enabled for concurrent reads
 - **Graceful Shutdown**: Automatic connection cleanup
 
+## 🔗 Discord API Integration
+
+- **Endpoint**: Guild Member API (`/guilds/{guild_id}/members/{user_id}`)
+- **Authentication**: Bot token (requires Server Members Intent)
+- **Caching**: 30-minute cache per user to reduce API calls
+- **Rate Limiting**: Batch processing (10 users at a time) with 100ms delays
+- **Timeout**: 3-second timeout per request
+- **Fallback**: Shows user IDs if API is disabled or fails
+
 ## 🎯 Expected Database Structure
 
-The queries assume a table like:
+The queries work with this table structure:
 
 ```sql
-CREATE TABLE user_stats (
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  server_id TEXT NOT NULL,
-  username TEXT NOT NULL,
-  avatar TEXT,
-  exp INTEGER DEFAULT 0,
-  level INTEGER DEFAULT 0,
-  messages INTEGER DEFAULT 0,
-  coins INTEGER DEFAULT 0,
-  PRIMARY KEY (user_id, server_id)
+  guild_id TEXT NOT NULL,
+  xp INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1,
+  last_message INTEGER DEFAULT 0,
+  voice_join_time INTEGER,
+  voice_total_time INTEGER DEFAULT 0,
+  UNIQUE(user_id, guild_id)
 );
 ```
 
-**Adjust queries if your schema differs!**
+**Note:** Usernames are fetched from Discord API, not stored in database.
 
 ## 🔜 Future Enhancements
 
@@ -317,8 +349,19 @@ Potential features to add:
 - [ ] Date range selection for statistics
 - [ ] More chart types and visualizations
 - [ ] Multi-server support (code ready, just needs uncommenting)
+- [ ] Store usernames in database for faster loading
 
 ## 🐛 Troubleshooting
+
+### "Still showing User IDs"
+
+Make sure:
+- `DISCORD_API_ENABLED=true` in `.env.local`
+- `DISCORD_BOT_TOKEN` is set correctly
+- **Server Members Intent** is enabled in Developer Portal
+- You've rebuilt with `npm run build`
+
+See `DISCORD_API_SETUP.md` for detailed troubleshooting.
 
 ### TypeScript Errors
 

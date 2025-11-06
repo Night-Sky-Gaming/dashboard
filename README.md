@@ -7,6 +7,7 @@ A modern, responsive dashboard for the Andromeda Gaming Background bot built wit
 - 📊 **Real-time Statistics** - View server metrics, user counts, activity, and level distribution
 - 🏆 **Leaderboard Display** - Sortable leaderboard with user rankings and search
 - 👥 **Users Directory** - Complete user list with pagination (50 per page)
+- 👤 **Discord Integration** - Fetches real Discord usernames and avatars via Guild Member API
 - ⚙️ **Settings Page** - Bot configuration interface (demonstration only)
 - 💾 **SQLite Integration** - Direct connection to the bot's database
 - 🎨 **Modern UI** - Discord-themed responsive interface with functional notifications
@@ -19,6 +20,7 @@ A modern, responsive dashboard for the Andromeda Gaming Background bot built wit
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Database**: SQLite (better-sqlite3)
+- **API**: Discord REST API (Guild Member endpoint)
 - **Icons**: Lucide React
 
 ## Getting Started
@@ -27,6 +29,7 @@ A modern, responsive dashboard for the Andromeda Gaming Background bot built wit
 
 - Node.js 18+ installed
 - A SQLite database file
+- Discord bot with Server Members Intent enabled
 
 ### Installation
 
@@ -38,13 +41,13 @@ npm install
 
 2. **Set up environment variables:**
 
-Copy the `.env.example` file to `.env`:
+Copy the `.env.example` file to `.env.local`:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Edit `.env` and configure:
+Edit `.env.local` and configure:
 
 ```env
 # Path to the bot's SQLite database (absolute path recommended)
@@ -54,22 +57,26 @@ DATABASE_PATH=/path/to/the/bot/leveling.db
 DISCORD_CLIENT_ID=the_client_id_here
 DISCORD_CLIENT_SECRET=the_client_secret_here
 DISCORD_BOT_TOKEN=your_bot_token_here
-DISCORD_API_ENABLED=false
+DISCORD_API_ENABLED=true
 NEXT_PUBLIC_DISCORD_BOT_NAME=Andromeda Gaming Background Bot
 ```
 
 > **Important:** Use an absolute path for `DATABASE_PATH` to avoid connection issues. The dashboard connects in **read-only mode** to safely access the bot's database without interfering with bot operations.
 
-> ⚠️ **Known Issue - Discord Names:** Currently, Discord API integration for fetching real server and user names is disabled (`DISCORD_API_ENABLED=false`). When enabled, the Discord REST API calls were causing the dashboard to hang because bot tokens don't have the necessary OAuth2 scopes to fetch user/guild information. As a workaround, the dashboard displays:
->
-> - Server: `Andromeda Gaming` (hardcoded in header)
-> - Users as: `User 10849180` (truncated user ID)
->
-> **Future Solutions:**
->
-> - Store usernames and server names directly in the bot's database when users gain XP
-> - Implement Discord OAuth2 authentication with proper scopes
-> - Create a custom API endpoint in the bot to fetch names via Discord.js client
+3. **Enable Discord API (for real usernames):**
+
+To fetch real Discord usernames and avatars:
+
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+2. Select your bot application
+3. Go to **Bot** section
+4. Enable **SERVER MEMBERS INTENT** under Privileged Gateway Intents
+5. Copy your bot token and add it to `.env.local`
+6. Set `DISCORD_API_ENABLED=true` in `.env.local`
+
+See `DISCORD_API_SETUP.md` for detailed setup instructions.
+
+> **Note:** The dashboard uses the Guild Member API endpoint which works perfectly with bot tokens. No OAuth2 scopes needed - just the Server Members Intent!
 
 > ⚙️ **Settings Page Notice:** The settings page is currently for demonstration purposes only. Changes made do not affect the bot's actual configuration. See `SETTINGS_INTEGRATION.md` for details on implementing actual bot configuration integration.
 
@@ -87,6 +94,8 @@ CREATE TABLE users (
   xp INTEGER DEFAULT 0,
   level INTEGER DEFAULT 1,
   last_message INTEGER DEFAULT 0,
+  voice_join_time INTEGER,
+  voice_total_time INTEGER DEFAULT 0,
   UNIQUE(user_id, guild_id)
 );
 ```
@@ -94,8 +103,10 @@ CREATE TABLE users (
 **Key Features:**
 
 - Tracks user XP and levels per guild
+- Tracks voice channel time
 - Uses the formula: `level = floor(0.1 * sqrt(xp)) + 1`
 - Read-only access to prevent conflicts with the bot
+- Usernames fetched dynamically from Discord API (not stored in database)
 
 ### Running the Dashboard
 

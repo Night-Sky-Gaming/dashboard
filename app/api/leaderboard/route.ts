@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DatabaseService } from "@/lib/database/queries";
+import { getDiscordUsers } from "@/lib/discord";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -16,10 +17,24 @@ export async function GET(request: NextRequest) {
 
 		const leaderboard = DatabaseService.getLeaderboard(serverId, limit);
 
+		// Fetch Discord usernames and avatars
+		const userIds = leaderboard.map((entry) => entry.user_id);
+		const discordUsers = await getDiscordUsers(userIds, serverId);
+
+		// Merge Discord data with leaderboard data
+		const enrichedLeaderboard = leaderboard.map((entry) => {
+			const discordData = discordUsers.get(entry.user_id);
+			return {
+				...entry,
+				username: discordData?.name || entry.username,
+				avatar: discordData?.avatar || null,
+			};
+		});
+
 		return NextResponse.json({
 			success: true,
-			data: leaderboard,
-			count: leaderboard.length,
+			data: enrichedLeaderboard,
+			count: enrichedLeaderboard.length,
 		});
 	} catch (error) {
 		console.error("Leaderboard API error:", error);

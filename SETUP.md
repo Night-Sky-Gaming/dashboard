@@ -10,20 +10,31 @@ npm install
 
 ### Step 2: Configure Environment
 
-Create a `.env` file in the root directory:
+Create a `.env.local` file in the root directory:
 
 ```bash
 DATABASE_PATH=/absolute/path/to/your/bot/leveling.db
 DISCORD_BOT_TOKEN=your_bot_token_here
-DISCORD_API_ENABLED=false
+DISCORD_API_ENABLED=true
 NEXT_PUBLIC_DISCORD_BOT_NAME=Andromeda Gaming Background Bot
 ```
 
 > ⚠️ **Important:** Use an absolute path for `DATABASE_PATH` for reliability.
 
-> ⚠️ **Discord API Note:** `DISCORD_API_ENABLED` is set to `false` because the Discord REST API integration was causing infinite loading issues. Bot tokens lack the OAuth2 scopes needed to fetch user/guild names via REST API, causing requests to hang indefinitely. The dashboard currently displays truncated IDs instead of real names.
+### Step 3: Enable Discord API
 
-### Step 3: Verify Database Schema
+To fetch real Discord usernames and avatars:
+
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+2. Select your bot application
+3. Click **Bot** section
+4. Scroll to **Privileged Gateway Intents**
+5. Enable **SERVER MEMBERS INTENT** ✅
+6. Save changes
+
+See `DISCORD_API_SETUP.md` for detailed instructions.
+
+### Step 4: Verify Database Schema
 
 The dashboard expects this table structure:
 
@@ -41,27 +52,34 @@ CREATE TABLE users (
 );
 ```
 
-### Step 4: Run the Dashboard
+### Step 5: Run the Dashboard
 
 ```bash
-npm run dev
+npm run build
+npm start
 ```
 
 Visit: http://localhost:3000
 
 ---
 
-## ⚠️ Known Issues & Limitations
+## ✅ Discord Username Integration
 
-**Discord Names Not Showing**
+**How It Works:**
 
-- **Issue:** Server and user names display as truncated IDs (e.g., "Server 1425595783...", "User 10849180")
-- **Cause:** Bot tokens cannot access Discord's REST API `/users` and `/guilds` endpoints without OAuth2 scopes. When enabled, these API calls hung indefinitely, causing the dashboard to freeze with infinite loading.
-- **Current Workaround:** Display names are disabled (`DISCORD_API_ENABLED=false`)
-- **Future Solutions:**
-  - Store usernames/server names in your database when users interact with the bot
-  - Implement OAuth2 authentication
-  - Create a custom API in the bot to fetch names via Discord.js
+- Uses Discord's **Guild Member API** endpoint
+- Fetches usernames, nicknames, and avatars
+- Works with bot tokens (no OAuth2 needed!)
+- Requires **Server Members Intent** only
+- 30-minute caching for performance
+- Batch processing with rate limiting
+
+**What You'll See:**
+
+- Real Discord usernames instead of IDs
+- Server nicknames (if set) take priority
+- User avatars on leaderboard and user pages
+- Fast loading after first fetch (cached)
 
 ---
 
@@ -84,16 +102,17 @@ CREATE TABLE users (
 );
 ```
 
-The dashboard is specifically configured for this schema.
+**Note:** Usernames are fetched from Discord API dynamically, not stored in the database.
 
 ---
 
 ## 🔧 Customization Checklist
 
-- [x] Update `DATABASE_PATH` in `.env` with absolute path
-- [x] Add `DISCORD_BOT_TOKEN` to `.env`
-- [x] Set `DISCORD_API_ENABLED=false` (required for now)
-- [x] Update bot name in `.env`
+- [x] Update `DATABASE_PATH` in `.env.local` with absolute path
+- [x] Add `DISCORD_BOT_TOKEN` to `.env.local`
+- [x] Enable **Server Members Intent** in Developer Portal
+- [x] Set `DISCORD_API_ENABLED=true`
+- [x] Update bot name in `.env.local`
 - [ ] Customize colors in `tailwind.config.js` (optional)
 - [ ] Adjust leveling formula in `lib/utils.ts` if needed (optional)
 
@@ -102,8 +121,8 @@ The dashboard is specifically configured for this schema.
 ## 🎨 Pages Overview
 
 1. **Dashboard** (`/`) - Server statistics overview with total users and XP
-2. **Leaderboard** (`/leaderboard`) - Top users ranked by experience with search
-3. **Users** (`/users`) - Complete user directory with pagination (50 users per page)
+2. **Leaderboard** (`/leaderboard`) - Top users ranked by experience with search and real Discord usernames
+3. **Users** (`/users`) - Complete user directory with pagination, search, and Discord usernames/avatars
 4. **Statistics** (`/stats`) - Detailed analytics with level distribution, top performers, and charts
 5. **Settings** (`/settings`) - Bot configuration interface (demonstration only - see SETTINGS_INTEGRATION.md)
 
@@ -112,6 +131,12 @@ All pages are hardcoded to use Andromeda Gaming's guild ID: `1425595783952203829
 ---
 
 ## 🆕 New Features
+
+### Discord Username Integration ✨
+- Real Discord usernames displayed on leaderboard and users pages
+- Fetches server nicknames, global names, and usernames
+- User avatars shown throughout dashboard
+- Automatic 30-minute caching for performance
 
 ### Functional Notifications
 - Click the bell icon in the header

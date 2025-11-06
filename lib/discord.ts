@@ -32,10 +32,12 @@ const guildCache = new Map<
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
 
 /**
- * Fetch user information from Discord API
+ * Fetch user information from Discord API as a guild member
+ * This works with bot tokens by fetching from the guild member endpoint
  */
 export async function getDiscordUser(
-	userId: string
+	userId: string,
+	guildId: string = "1425595783952203829" // Andromeda Gaming guild ID
 ): Promise<{ name: string; avatar: string | null } | null> {
 	// Return null if API is disabled
 	if (!DISCORD_API_ENABLED) {
@@ -53,22 +55,32 @@ export async function getDiscordUser(
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
-		const response = await fetch(`${DISCORD_API_BASE}/users/${userId}`, {
-			headers: {
-				Authorization: TOKEN,
-			},
-			signal: controller.signal,
-		});
+		// Use guild member endpoint instead of users endpoint
+		// This works with bot tokens as long as the bot is in the guild
+		const response = await fetch(
+			`${DISCORD_API_BASE}/guilds/${guildId}/members/${userId}`,
+			{
+				headers: {
+					Authorization: TOKEN,
+				},
+				signal: controller.signal,
+			}
+		);
 
 		clearTimeout(timeoutId);
 
 		if (!response.ok) {
-			console.error(`Failed to fetch user ${userId}: ${response.status}`);
+			console.error(
+				`Failed to fetch guild member ${userId} in guild ${guildId}: ${response.status}`
+			);
 			return null;
 		}
 
-		const user: DiscordUser = await response.json();
-		const name = user.global_name || user.username;
+		const member: any = await response.json();
+		const user = member.user;
+
+		// Prefer server nickname, then global name, then username
+		const name = member.nick || user.global_name || user.username;
 		const avatar = user.avatar
 			? `https://cdn.discordapp.com/avatars/${userId}/${user.avatar}.png`
 			: null;
@@ -79,9 +91,9 @@ export async function getDiscordUser(
 		return { name, avatar };
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") {
-			console.error(`Timeout fetching user ${userId}`);
+			console.error(`Timeout fetching guild member ${userId}`);
 		} else {
-			console.error(`Error fetching user ${userId}:`, error);
+			console.error(`Error fetching guild member ${userId}:`, error);
 		}
 		return null;
 	}
@@ -143,10 +155,11 @@ export async function getDiscordGuild(
 }
 
 /**
- * Batch fetch multiple users
+ * Batch fetch multiple users from a guild
  */
 export async function getDiscordUsers(
-	userIds: string[]
+	userIds: string[],
+	guildId: string = "1425595783952203829" // Andromeda Gaming guild ID
 ): Promise<Map<string, { name: string; avatar: string | null }>> {
 	const results = new Map<string, { name: string; avatar: string | null }>();
 
@@ -155,7 +168,7 @@ export async function getDiscordUsers(
 	for (let i = 0; i < userIds.length; i += batchSize) {
 		const batch = userIds.slice(i, i + batchSize);
 		const promises = batch.map(async (userId) => {
-			const user = await getDiscordUser(userId);
+			const user = await getDiscordUser(userId, guildId);
 			if (user) {
 				results.set(userId, user);
 			}

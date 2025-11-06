@@ -24,6 +24,8 @@ export interface Server {
 export interface UserStats {
 	user_id: string;
 	server_id: string;
+	username?: string;
+	avatar?: string | null;
 	exp: number;
 	level: number;
 	messages: number;

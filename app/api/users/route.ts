@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DatabaseService } from "@/lib/database/queries";
+import { getDiscordUsers, getDiscordUser } from "@/lib/discord";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -17,9 +18,23 @@ export async function GET(request: NextRequest) {
 				limit
 			);
 
+			// Fetch Discord usernames and avatars for all users
+			const userIds = users.map((user) => user.user_id);
+			const discordUsers = await getDiscordUsers(userIds, serverId);
+
+			// Merge Discord data with user data
+			const enrichedUsers = users.map((user) => {
+				const discordData = discordUsers.get(user.user_id);
+				return {
+					...user,
+					username: discordData?.name || user.username,
+					avatar: discordData?.avatar || null,
+				};
+			});
+
 			return NextResponse.json({
 				success: true,
-				data: users,
+				data: enrichedUsers,
 				pagination: {
 					page,
 					limit,
@@ -41,6 +56,13 @@ export async function GET(request: NextRequest) {
 
 		if (!stats) {
 			return NextResponse.json({ error: "User not found" }, { status: 404 });
+		}
+
+		// Fetch Discord data for the specific user
+		const discordData = await getDiscordUser(userId, serverId);
+		if (discordData) {
+			stats.username = discordData.name;
+			stats.avatar = discordData.avatar;
 		}
 
 		return NextResponse.json({
