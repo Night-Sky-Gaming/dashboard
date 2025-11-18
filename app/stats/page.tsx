@@ -77,7 +77,7 @@ export default function StatisticsPage() {
 		*/
 		
 		// For now, use hardcoded server ID (Andromeda Gaming)
-		const hardcodedServerId = "1425595783952203829";
+		const hardcodedServerId = "1430038605518077964";
 		setSelectedServer(hardcodedServerId);
 		fetchStatistics(hardcodedServerId);
 	}, []);

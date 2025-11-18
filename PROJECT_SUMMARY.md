@@ -81,7 +81,7 @@ The Next.js dashboard for the Andromeda Gaming Discord bot has been successfully
 ### 9. ✅ Hardcoded Single Server
 
 - Server name: "Andromeda Gaming" displayed in header
-- Guild ID: `1425595783952203829` (hardcoded)
+- Guild ID: `1430038605518077964` (hardcoded)
 - All multi-server code preserved in comments for future use
 - Easy to re-enable for multiple servers
 
@@ -382,8 +382,8 @@ npm install
 
 1. Verify table/column names match in `lib/database/queries.ts`
 2. Check database has data
-3. Confirm the hardcoded guild ID `1425595783952203829` matches the database
-4. Run: `SELECT * FROM users WHERE guild_id = '1425595783952203829' LIMIT 5;`
+3. Confirm the hardcoded guild ID `1430038605518077964` matches the database
+4. Run: `SELECT * FROM users WHERE guild_id = '1430038605518077964' LIMIT 5;`
 
 ### Port Already in Use
 

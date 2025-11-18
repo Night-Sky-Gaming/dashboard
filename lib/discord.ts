@@ -37,7 +37,7 @@ const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
  */
 export async function getDiscordUser(
 	userId: string,
-	guildId: string = "1425595783952203829" // Andromeda Gaming guild ID
+	guildId: string = "1430038605518077964" // Andromeda Gaming guild ID
 ): Promise<{ name: string; avatar: string | null } | null> {
 	// Return null if API is disabled
 	if (!DISCORD_API_ENABLED) {
@@ -159,7 +159,7 @@ export async function getDiscordGuild(
  */
 export async function getDiscordUsers(
 	userIds: string[],
-	guildId: string = "1425595783952203829" // Andromeda Gaming guild ID
+	guildId: string = "1430038605518077964" // Andromeda Gaming guild ID
 ): Promise<Map<string, { name: string; avatar: string | null }>> {
 	const results = new Map<string, { name: string; avatar: string | null }>();
 

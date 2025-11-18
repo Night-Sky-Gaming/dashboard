@@ -49,7 +49,7 @@ Replace `your_bot_token_here` with the token you copied in step 1.
 
 ### 4. Verify Bot is in Guild
 
-Make sure your bot is actually in the Andromeda Gaming server (Guild ID: `1425595783952203829`). You can verify this by:
+Make sure your bot is actually in the Andromeda Gaming server (Guild ID: `1430038605518077964`). You can verify this by:
 
 1. Check your Discord server's member list
 2. Or test the API with this endpoint: `/api/test-discord` (we can create this if needed)

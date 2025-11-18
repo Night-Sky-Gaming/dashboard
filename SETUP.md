@@ -126,7 +126,7 @@ CREATE TABLE users (
 4. **Statistics** (`/stats`) - Detailed analytics with level distribution, top performers, and charts
 5. **Settings** (`/settings`) - Bot configuration interface (demonstration only - see SETTINGS_INTEGRATION.md)
 
-All pages are hardcoded to use Andromeda Gaming's guild ID: `1425595783952203829`
+All pages are hardcoded to use Andromeda Gaming's guild ID: `1430038605518077964`
 
 ---
 

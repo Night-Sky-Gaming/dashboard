@@ -354,7 +354,7 @@ This dashboard is specifically configured for **Andromeda Gaming** and uses a ha
 
 1. **Locate the bot's database:** Find `leveling.db` in the bot's directory
 2. **Set the path:** Update `DATABASE_PATH` in `.env` with the absolute path
-3. **Verify guild ID:** Dashboard uses `1425595783952203829` (hardcoded)
+3. **Verify guild ID:** Dashboard uses `1430038605518077964` (hardcoded)
 4. **Start the dashboard:** Run `npm run dev` or `npm start`
 5. **View data:** All pages automatically load data for Andromeda Gaming server
 
