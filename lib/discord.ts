@@ -6,6 +6,14 @@ const DISCORD_API_BASE = "https://discord.com/api/v10";
 const TOKEN = `Bot ${process.env.DISCORD_BOT_TOKEN}`;
 const DISCORD_API_ENABLED = process.env.DISCORD_API_ENABLED === "true"; // Feature flag
 
+// Log configuration on module load
+console.log("[Discord API] Module loaded with config:", {
+	DISCORD_API_ENABLED: process.env.DISCORD_API_ENABLED,
+	parsedEnabled: DISCORD_API_ENABLED,
+	hasBotToken: !!process.env.DISCORD_BOT_TOKEN,
+	tokenLength: process.env.DISCORD_BOT_TOKEN?.length || 0
+});
+
 interface DiscordUser {
 	id: string;
 	username: string;
@@ -45,7 +53,7 @@ export async function getDiscordUser(
 		return null;
 	}
 	
-	console.log(`[Discord API] Fetching user ${userId} from guild ${guildId}`);!
+	console.log(`[Discord API] Fetching user ${userId} from guild ${guildId}`);
 
 	// Check cache first
 	const cached = userCache.get(userId);
