@@ -105,7 +105,7 @@ cd /var/www/dashboard
 npm ci
 ```
 
-Note: We need to install dev dependencies too because Next.js requires them for the build process.
+This installs all dependencies including dev dependencies needed for the build.
 
 ---
 
@@ -115,11 +115,19 @@ Note: We need to install dev dependencies too because Next.js requires them for 
 npm run build
 ```
 
-After the build completes successfully, you can optionally remove dev dependencies to save space:
+If you get "command not found" errors, use:
 
 ```bash
-npm prune --production
+npx next build
 ```
+
+Verify the build was created:
+
+```bash
+ls -la .next
+```
+
+You should see a `.next` directory with build files.
 
 ---
 
@@ -190,6 +198,13 @@ sudo systemctl enable nginx
 
 ```bash
 cd /var/www/dashboard
+pm2 start ecosystem.config.js
+```
+
+If PM2 shows errors about "too many restarts", delete and restart:
+
+```bash
+pm2 delete andromeda-dashboard
 pm2 start ecosystem.config.js
 ```
 
@@ -307,14 +322,11 @@ cd /var/www/dashboard
 # Pull latest changes from GitHub
 git pull origin main
 
-# Install any new dependencies (including dev dependencies for build)
+# Install any new dependencies
 npm ci
 
 # Rebuild
 npm run build
-
-# Optional: Remove dev dependencies after build to save space
-npm prune --production
 
 # Restart PM2
 pm2 restart andromeda-dashboard
@@ -330,6 +342,27 @@ pm2 logs andromeda-dashboard
 ### Application won't start?
 ```bash
 pm2 logs andromeda-dashboard --lines 100
+```
+
+### Build directory missing?
+```bash
+cd /var/www/dashboard
+ls -la .next  # Check if build exists
+npm run build  # Rebuild if needed
+pm2 restart andromeda-dashboard
+```
+
+### "Command not found" for next?
+```bash
+cd /var/www/dashboard
+npx next build  # Use npx to run local next binary
+```
+
+### PM2 "too many restarts" error?
+```bash
+pm2 delete andromeda-dashboard
+pm2 start ecosystem.config.js
+pm2 save
 ```
 
 ### Can't access the website?

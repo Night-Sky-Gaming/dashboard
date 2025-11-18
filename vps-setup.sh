@@ -56,11 +56,6 @@ echo "===== STEP 10: Build Next.js Application ====="
 npm run build
 
 echo ""
-echo "===== STEP 10b: Cleanup Dev Dependencies (Optional) ====="
-echo "Removing dev dependencies to save space..."
-npm prune --production
-
-echo ""
 echo "===== STEP 11: Configure Environment Variables ====="
 cp .env.production .env
 echo "Opening .env file for editing..."

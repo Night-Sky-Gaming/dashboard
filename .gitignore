@@ -37,3 +37,6 @@ next-env.d.ts
 *.db
 *.sqlite
 *.sqlite3
+
+
+ecosystem.config.js

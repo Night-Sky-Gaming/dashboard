@@ -60,14 +60,11 @@ mkdir -p logs
 # Fix ownership to ensure you can install packages
 sudo chown -R $USER:$USER /var/www/dashboard
 
-# Install dependencies (including dev dependencies needed for build)
+# Install all dependencies
 npm ci
 
 # Build the Next.js application
 npm run build
-
-# Optional: Remove dev dependencies after build to save disk space
-npm prune --production
 ```
 
 ### 4. Configure Environment Variables
@@ -201,14 +198,11 @@ cd /var/www/dashboard
 # Pull latest changes from GitHub
 git pull origin main
 
-# Install any new dependencies (including dev dependencies for build)
+# Install any new dependencies
 npm ci
 
 # Rebuild the application
 npm run build
-
-# Optional: Remove dev dependencies after build
-npm prune --production
 
 # Restart with PM2
 pm2 restart andromeda-dashboard
