@@ -18,8 +18,10 @@ export async function GET(request: NextRequest) {
 		const leaderboard = DatabaseService.getLeaderboard(serverId, limit);
 
 		// Fetch Discord usernames and avatars
+		console.log(`[Leaderboard API] Fetching Discord data for ${leaderboard.length} users`);
 		const userIds = leaderboard.map((entry) => entry.user_id);
 		const discordUsers = await getDiscordUsers(userIds, serverId);
+		console.log(`[Leaderboard API] Received Discord data for ${discordUsers.size} users`);
 
 		// Merge Discord data with leaderboard data
 		const enrichedLeaderboard = leaderboard.map((entry) => {

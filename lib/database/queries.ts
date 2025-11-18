@@ -38,11 +38,8 @@ export class DatabaseService {
 			const stmt = db.prepare(query);
 			const results = stmt.all(serverId, limit) as LeaderboardEntry[];
 
-			// Return results with shortened user IDs (no Discord API for now)
-			return results.map((entry) => ({
-				...entry,
-				username: `User ${entry.user_id.slice(0, 8)}`,
-			}));
+			// Return results - username will be enriched by Discord API in route handlers
+			return results;
 		} catch (error) {
 			console.error("Error fetching leaderboard:", error);
 			return [];
@@ -213,13 +210,8 @@ export class DatabaseService {
 			const stmt = db.prepare(query);
 			const results = stmt.all(serverId, limit, offset) as LeaderboardEntry[];
 
-			// Return results with shortened user IDs (no Discord API for now)
-			const users = results.map((entry) => ({
-				...entry,
-				username: `User ${entry.user_id.slice(0, 8)}`,
-			}));
-
-			return { users, total };
+			// Return results - username will be enriched by Discord API in route handlers
+			return { users: results, total };
 		} catch (error) {
 			console.error("Error fetching all users:", error);
 			return { users: [], total: 0 };
@@ -269,11 +261,8 @@ export class DatabaseService {
 				level: number;
 			}>;
 
-			// Format top performers with shortened user IDs
-			const formattedTopPerformers = topPerformers.map((user) => ({
-				...user,
-				username: `User ${user.user_id.slice(0, 8)}`,
-			}));
+			// Return raw top performers - username will be enriched by Discord API if needed
+			const formattedTopPerformers = topPerformers;
 
 			// Get average level
 			const avgLevelQuery = `

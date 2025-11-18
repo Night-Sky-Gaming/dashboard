@@ -41,8 +41,11 @@ export async function getDiscordUser(
 ): Promise<{ name: string; avatar: string | null } | null> {
 	// Return null if API is disabled
 	if (!DISCORD_API_ENABLED) {
+		console.log("[Discord API] Discord API is disabled (DISCORD_API_ENABLED=false)");
 		return null;
 	}
+	
+	console.log(`[Discord API] Fetching user ${userId} from guild ${guildId}`);!
 
 	// Check cache first
 	const cached = userCache.get(userId);
@@ -71,7 +74,7 @@ export async function getDiscordUser(
 
 		if (!response.ok) {
 			console.error(
-				`Failed to fetch guild member ${userId} in guild ${guildId}: ${response.status}`
+				`Failed to fetch guild member ${userId} in guild ${guildId}: ${response.status} ${response.statusText}`
 			);
 			return null;
 		}
@@ -84,6 +87,8 @@ export async function getDiscordUser(
 		const avatar = user.avatar
 			? `https://cdn.discordapp.com/avatars/${userId}/${user.avatar}.png`
 			: null;
+
+		console.log(`[Discord API] Successfully fetched user ${userId}: ${name}`);
 
 		// Cache the result
 		userCache.set(userId, { name, avatar, timestamp: Date.now() });
