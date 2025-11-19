@@ -86,8 +86,8 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="text-6xl mb-4">🎮</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome to the Dashboard</h2>
-          <p className="text-gray-400">Please select a server from the dropdown above to view statistics.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome to Andromeda Gaming Dashboard</h2>
+          <p className="text-gray-400">Select an item from the side menu to get started.</p>
         </div>
       </div>
     );
