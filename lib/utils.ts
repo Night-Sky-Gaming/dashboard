@@ -41,8 +41,12 @@ export function calculateLevelProgress(exp: number): {
 export function formatDuration(seconds: number): string {
 	if (!seconds || seconds === 0) return "0m";
 
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
+	// Database stores voice_total_time in MILLISECONDS, not seconds
+	// Convert milliseconds to seconds first
+	const totalSeconds = Math.floor(seconds / 1000);
+	
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
 
 	if (hours > 0) {
 		return `${hours}h ${minutes}m`;
