@@ -41,9 +41,6 @@ export function calculateLevelProgress(exp: number): {
 export function formatDuration(seconds: number): string {
 	if (!seconds || seconds === 0) return "0m";
 
-	// Log the raw value for debugging
-	console.log(`[formatDuration] Raw value: ${seconds}`);
-
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 
