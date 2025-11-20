@@ -196,7 +196,7 @@ export default function StatisticsPage() {
 							<div>
 								<p className="text-sm text-gray-400">Voice Time</p>
 								<p className="text-2xl font-bold text-white">
-									{(stats.totalVoiceTime / 3600).toFixed(0)}h
+									{(stats.totalVoiceTime / 3600000).toFixed(0)}h
 								</p>
 							</div>
 							<Clock className="w-8 h-8 text-purple-500" />
