@@ -6,14 +6,33 @@ let db: Database.Database | null = null;
 
 export function getDatabase(): Database.Database {
   if (!db) {
-    const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'database.sqlite');
+    // Try multiple possible database paths in order of preference
+    const possiblePaths = [
+      process.env.DATABASE_PATH,
+      '/var/lib/dashboard/leveling.db',
+      '/home/ubuntu/background/leveling.db',
+      path.join(process.cwd(), 'database.sqlite'),
+    ].filter(Boolean) as string[];
+    
+    let dbPath: string | null = null;
+    
+    // Find the first path that exists
+    for (const testPath of possiblePaths) {
+      if (fs.existsSync(testPath)) {
+        dbPath = testPath;
+        break;
+      }
+    }
+    
+    if (!dbPath) {
+      const errorMsg = `Database file not found. Tried paths:\n${possiblePaths.join('\n')}`;
+      console.error(errorMsg);
+      console.error('DATABASE_PATH env var:', process.env.DATABASE_PATH);
+      console.error('Current working directory:', process.cwd());
+      throw new Error(errorMsg);
+    }
     
     try {
-      // Check if file exists and is readable
-      if (!fs.existsSync(dbPath)) {
-        throw new Error(`Database file does not exist at: ${dbPath}`);
-      }
-      
       // Check if we can read the file
       try {
         fs.accessSync(dbPath, fs.constants.R_OK);
