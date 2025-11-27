@@ -21,7 +21,7 @@ export default function UsersPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalUsers, setTotalUsers] = useState(0);
-	const usersPerPage = 50;
+	const usersPerPage = 5;
 
 	useEffect(() => {
 		// Hardcoded for Andromeda Gaming server
@@ -285,7 +285,7 @@ export default function UsersPage() {
 			{totalPages > 1 && (
 				<div className="flex items-center justify-between bg-discord-dark border border-gray-700 rounded-lg px-6 py-4">
 					<div className="text-gray-400">
-						Showing page {currentPage} of {totalPages}
+						Page {currentPage} of {totalPages} • Showing {((currentPage - 1) * usersPerPage) + 1} to {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
 					</div>
 
 					<div className="flex items-center space-x-2">
@@ -297,35 +297,6 @@ export default function UsersPage() {
 							<ChevronLeft className="w-4 h-4" />
 							<span>Previous</span>
 						</button>
-
-						<div className="flex items-center space-x-1">
-							{[...Array(Math.min(5, totalPages))].map((_, i) => {
-								let pageNum;
-								if (totalPages <= 5) {
-									pageNum = i + 1;
-								} else if (currentPage <= 3) {
-									pageNum = i + 1;
-								} else if (currentPage >= totalPages - 2) {
-									pageNum = totalPages - 4 + i;
-								} else {
-									pageNum = currentPage - 2 + i;
-								}
-
-								return (
-									<button
-										key={pageNum}
-										onClick={() => handlePageChange(pageNum)}
-										className={`px-3 py-2 rounded-lg transition-colors ${
-											currentPage === pageNum
-												? "bg-discord-blurple text-white"
-												: "bg-discord-darker border border-gray-700 text-gray-400 hover:bg-discord-dark"
-										}`}
-									>
-										{pageNum}
-									</button>
-								);
-							})}
-						</div>
 
 						<button
 							onClick={() => handlePageChange(currentPage + 1)}
