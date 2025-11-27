@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams;
 		const serverId = searchParams.get("serverId");
-		const limit = parseInt(searchParams.get("limit") || "100");
+		const page = parseInt(searchParams.get("page") || "1");
+		const pageSize = parseInt(searchParams.get("pageSize") || "25");
 
 		if (!serverId) {
 			return NextResponse.json(
@@ -15,7 +16,14 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const leaderboard = DatabaseService.getLeaderboard(serverId, limit);
+		// Get total count for pagination
+		const totalLeaderboard = DatabaseService.getLeaderboard(serverId, 10000);
+		const totalCount = totalLeaderboard.length;
+		const totalPages = Math.ceil(totalCount / pageSize);
+
+		// Get paginated results
+		const offset = (page - 1) * pageSize;
+		const leaderboard = totalLeaderboard.slice(offset, offset + pageSize);
 
 		// Fetch Discord usernames and avatars
 		console.log(`[Leaderboard API] Fetching Discord data for ${leaderboard.length} users`);
@@ -36,7 +44,14 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json({
 			success: true,
 			data: enrichedLeaderboard,
-			count: enrichedLeaderboard.length,
+			pagination: {
+				page,
+				pageSize,
+				totalCount,
+				totalPages,
+				hasNext: page < totalPages,
+				hasPrev: page > 1,
+			},
 		});
 	} catch (error) {
 		console.error("Leaderboard API error:", error);

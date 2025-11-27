@@ -1,15 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trophy, Medal, Award, Search } from "lucide-react";
+import { Trophy, Medal, Award, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { getDiscordAvatarUrl, formatNumber } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/lib/types/database";
+
+interface PaginationData {
+	page: number;
+	pageSize: number;
+	totalCount: number;
+	totalPages: number;
+	hasNext: boolean;
+	hasPrev: boolean;
+}
 
 export default function LeaderboardPage() {
 	const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedServer, setSelectedServer] = useState<string | null>(null);
+	const [pagination, setPagination] = useState<PaginationData>({
+		page: 1,
+		pageSize: 25,
+		totalCount: 0,
+		totalPages: 0,
+		hasNext: false,
+		hasPrev: false,
+	});
+	const [currentPage, setCurrentPage] = useState(1);
 
 	useEffect(() => {
 		// Hardcoded for Andromeda Gaming server
@@ -45,21 +63,30 @@ export default function LeaderboardPage() {
 		fetchLeaderboard(hardcodedServerId);
 	}, []);
 
-	const fetchLeaderboard = async (serverId: string) => {
+	const fetchLeaderboard = async (serverId: string, page: number = 1) => {
 		setLoading(true);
 		try {
 			const response = await fetch(
-				`/api/leaderboard?serverId=${serverId}&limit=100`
+				`/api/leaderboard?serverId=${serverId}&page=${page}&pageSize=25`
 			);
 			const data = await response.json();
 
 			if (data.success) {
 				setLeaderboard(data.data);
+				setPagination(data.pagination);
 			}
 		} catch (error) {
 			console.error("Failed to fetch leaderboard:", error);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handlePageChange = (newPage: number) => {
+		if (selectedServer && newPage >= 1 && newPage <= pagination.totalPages) {
+			setCurrentPage(newPage);
+			fetchLeaderboard(selectedServer, newPage);
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	};
 
@@ -192,6 +219,91 @@ export default function LeaderboardPage() {
 					</table>
 				</div>
 			</div>
+
+			{/* Pagination Controls */}
+			{pagination.totalPages > 1 && (
+				<div className="flex items-center justify-between bg-discord-dark-tertiary rounded-lg px-6 py-4">
+					<div className="text-sm text-gray-400">
+						Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{" "}
+						{Math.min(pagination.page * pagination.pageSize, pagination.totalCount)} of{" "}
+						{pagination.totalCount} users
+					</div>
+
+					<div className="flex items-center space-x-2">
+						<button
+							onClick={() => handlePageChange(currentPage - 1)}
+							disabled={!pagination.hasPrev}
+							className="px-3 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
+						>
+							<ChevronLeft className="w-4 h-4" />
+							<span>Previous</span>
+						</button>
+
+						<div className="flex items-center space-x-1">
+							{/* First page */}
+							{currentPage > 3 && (
+								<>
+									<button
+										onClick={() => handlePageChange(1)}
+										className="px-3 py-2 bg-discord-dark rounded-lg text-white hover:bg-discord-dark-secondary transition-colors"
+									>
+										1
+									</button>
+									{currentPage > 4 && <span className="text-gray-400">...</span>}
+								</>
+							)}
+
+							{/* Pages around current */}
+							{Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+								.filter(
+									(page) =>
+										page === currentPage ||
+										page === currentPage - 1 ||
+										page === currentPage + 1 ||
+										page === currentPage - 2 ||
+										page === currentPage + 2
+								)
+								.map((page) => (
+									<button
+										key={page}
+										onClick={() => handlePageChange(page)}
+										className={`px-3 py-2 rounded-lg transition-colors ${
+											page === currentPage
+												? "bg-discord-blurple text-white"
+												: "bg-discord-dark text-white hover:bg-discord-dark-secondary"
+										}`}
+									>
+										{page}
+									</button>
+								))}
+
+							{/* Last page */}
+							{currentPage < pagination.totalPages - 2 && (
+								<>
+									{currentPage < pagination.totalPages - 3 && (
+										<span className="text-gray-400">...</span>
+									)}
+									<button
+										onClick={() => handlePageChange(pagination.totalPages)}
+										className="px-3 py-2 bg-discord-dark rounded-lg text-white hover:bg-discord-dark-secondary transition-colors"
+									>
+										{pagination.totalPages}
+									</button>
+								</>
+							)}
+						</div>
+
+						<button
+							onClick={() => handlePageChange(currentPage + 1)}
+							disabled={!pagination.hasNext}
+							className="px-3 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
+						>
+							<span>Next</span>
+							<ChevronRight className="w-4 h-4" />
+						</button>
+					</div>
+				</div>
+			)}
 
 			{filteredLeaderboard.length === 0 && (
 				<div className="text-center py-12 text-gray-400">No users found.</div>

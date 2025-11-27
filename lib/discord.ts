@@ -177,7 +177,8 @@ export async function getDiscordUsers(
 	const results = new Map<string, { name: string; avatar: string | null }>();
 
 	// Process in batches to avoid rate limiting
-	const batchSize = 10;
+	// Discord allows ~50 requests per second, so batch of 5 with 200ms delay is safe
+	const batchSize = 5;
 	for (let i = 0; i < userIds.length; i += batchSize) {
 		const batch = userIds.slice(i, i + batchSize);
 		const promises = batch.map(async (userId) => {
@@ -189,9 +190,9 @@ export async function getDiscordUsers(
 
 		await Promise.all(promises);
 
-		// Rate limit protection: wait a bit between batches
+		// Rate limit protection: wait between batches to avoid 429 errors
 		if (i + batchSize < userIds.length) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			await new Promise((resolve) => setTimeout(resolve, 200));
 		}
 	}
 
