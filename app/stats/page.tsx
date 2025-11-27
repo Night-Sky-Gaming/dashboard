@@ -10,6 +10,8 @@ import {
 	Clock,
 	Target,
 	Activity,
+	ChevronLeft,
+	ChevronRight,
 } from "lucide-react";
 import {
 	Card,
@@ -46,10 +48,28 @@ interface StatisticsData {
 	totalVoiceTime: number;
 }
 
+interface PaginationData {
+	page: number;
+	pageSize: number;
+	totalCount: number;
+	totalPages: number;
+	hasNext: boolean;
+	hasPrev: boolean;
+}
+
 export default function StatisticsPage() {
 	const [stats, setStats] = useState<StatisticsData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [selectedServer, setSelectedServer] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [pagination, setPagination] = useState<PaginationData>({
+		page: 1,
+		pageSize: 5,
+		totalCount: 0,
+		totalPages: 0,
+		hasNext: false,
+		hasPrev: false,
+	});
 
 	useEffect(() => {
 		// Hardcoded for Andromeda Gaming server
@@ -82,19 +102,30 @@ export default function StatisticsPage() {
 		fetchStatistics(hardcodedServerId);
 	}, []);
 
-	const fetchStatistics = async (serverId: string) => {
+	const fetchStatistics = async (serverId: string, page: number = 1) => {
 		setLoading(true);
 		try {
-			const response = await fetch(`/api/stats?serverId=${serverId}`);
+			const response = await fetch(`/api/stats?serverId=${serverId}&page=${page}&pageSize=5`);
 			const data = await response.json();
 
 			if (data.success) {
 				setStats(data.data);
+				if (data.pagination) {
+					setPagination(data.pagination);
+				}
 			}
 		} catch (error) {
 			console.error("Failed to fetch statistics:", error);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handlePageChange = (newPage: number) => {
+		if (selectedServer && newPage >= 1 && newPage <= pagination.totalPages) {
+			setCurrentPage(newPage);
+			fetchStatistics(selectedServer, newPage);
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	};
 
@@ -246,36 +277,68 @@ export default function StatisticsPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle>Top Performers</CardTitle>
-					<CardDescription>Most active users by experience</CardDescription>
+					<CardDescription>Most active users by experience (Page {currentPage} of {pagination.totalPages})</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
-						{stats.topPerformers.map((user, index) => (
-							<div
-								key={user.user_id}
-								className="flex items-center justify-between p-3 bg-discord-dark rounded-lg"
-							>
-								<div className="flex items-center space-x-4">
-									<div className="flex items-center justify-center w-8 h-8 bg-discord-blurple rounded-full">
-										<span className="text-sm font-bold text-white">
-											{index + 1}
-										</span>
+						{stats.topPerformers.map((user, index) => {
+							const globalRank = (currentPage - 1) * pagination.pageSize + index + 1;
+							return (
+								<div
+									key={user.user_id}
+									className="flex items-center justify-between p-3 bg-discord-dark rounded-lg"
+								>
+									<div className="flex items-center space-x-4">
+										<div className="flex items-center justify-center w-8 h-8 bg-discord-blurple rounded-full">
+											<span className="text-sm font-bold text-white">
+												{globalRank}
+											</span>
+										</div>
+										<div>
+											<p className="text-white font-medium">{user.username}</p>
+											<p className="text-xs text-gray-400">
+												Level {user.level}
+											</p>
+										</div>
 									</div>
-									<div>
-										<p className="text-white font-medium">{user.username}</p>
-										<p className="text-xs text-gray-400">
-											Level {user.level}
+									<div className="text-right">
+										<p className="text-white font-semibold">
+											{formatNumber(user.exp)} XP
 										</p>
 									</div>
 								</div>
-								<div className="text-right">
-									<p className="text-white font-semibold">
-										{formatNumber(user.exp)} XP
-									</p>
-								</div>
-							</div>
-						))}
+							);
+						})}
 					</div>
+
+					{/* Pagination Controls */}
+					{pagination.totalPages > 1 && (
+						<div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700">
+							<div className="text-sm text-gray-400">
+								Showing {((currentPage - 1) * pagination.pageSize) + 1} to {Math.min(currentPage * pagination.pageSize, pagination.totalCount)} of {pagination.totalCount} users
+							</div>
+
+							<div className="flex items-center space-x-2">
+								<button
+									onClick={() => handlePageChange(currentPage - 1)}
+									disabled={!pagination.hasPrev}
+									className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+								>
+									<ChevronLeft className="w-4 h-4" />
+									<span>Previous</span>
+								</button>
+
+								<button
+									onClick={() => handlePageChange(currentPage + 1)}
+									disabled={!pagination.hasNext}
+									className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+								>
+									<span>Next</span>
+									<ChevronRight className="w-4 h-4" />
+								</button>
+							</div>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 
