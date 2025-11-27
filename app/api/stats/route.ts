@@ -40,6 +40,12 @@ export async function GET(request: NextRequest) {
         ...detailedStats,
         topPerformers: enrichedTopPerformers,
       },
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
     console.error('Statistics API error:', error);

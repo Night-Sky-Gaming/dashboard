@@ -28,16 +28,8 @@ interface DiscordGuild {
 	icon: string | null;
 }
 
-// Cache to avoid excessive API calls
-const userCache = new Map<
-	string,
-	{ name: string; avatar: string | null; timestamp: number }
->();
-const guildCache = new Map<
-	string,
-	{ name: string; icon: string | null; timestamp: number }
->();
-const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
+// No caching - always fetch fresh data from Discord API
+// This ensures usernames/avatars are always up-to-date
 
 /**
  * Fetch user information from Discord API as a guild member
@@ -54,12 +46,6 @@ export async function getDiscordUser(
 	}
 	
 	console.log(`[Discord API] Fetching user ${userId} from guild ${guildId}`);
-
-	// Check cache first
-	const cached = userCache.get(userId);
-	if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-		return { name: cached.name, avatar: cached.avatar };
-	}
 
 	try {
 		// Add timeout to prevent hanging
@@ -98,9 +84,6 @@ export async function getDiscordUser(
 
 		console.log(`[Discord API] Successfully fetched user ${userId}: ${name}`);
 
-		// Cache the result
-		userCache.set(userId, { name, avatar, timestamp: Date.now() });
-
 		return { name, avatar };
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") {
@@ -121,12 +104,6 @@ export async function getDiscordGuild(
 	// Return null if API is disabled
 	if (!DISCORD_API_ENABLED) {
 		return null;
-	}
-
-	// Check cache first
-	const cached = guildCache.get(guildId);
-	if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-		return { name: cached.name, icon: cached.icon };
 	}
 
 	try {
@@ -152,9 +129,6 @@ export async function getDiscordGuild(
 		const icon = guild.icon
 			? `https://cdn.discordapp.com/icons/${guildId}/${guild.icon}.png`
 			: null;
-
-		// Cache the result
-		guildCache.set(guildId, { name: guild.name, icon, timestamp: Date.now() });
 
 		return { name: guild.name, icon };
 	} catch (error) {
@@ -197,12 +171,4 @@ export async function getDiscordUsers(
 	}
 
 	return results;
-}
-
-/**
- * Clear caches (useful for development)
- */
-export function clearDiscordCache() {
-	userCache.clear();
-	guildCache.clear();
 }

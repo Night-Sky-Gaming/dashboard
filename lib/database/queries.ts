@@ -37,11 +37,15 @@ export class DatabaseService {
 
 			const stmt = db.prepare(query);
 			const results = stmt.all(serverId, limit) as LeaderboardEntry[];
+			
+			// Close connection to ensure fresh data next time
+			db.close();
 
 			// Return results - username will be enriched by Discord API in route handlers
 			return results;
 		} catch (error) {
 			console.error("Error fetching leaderboard:", error);
+			db.close();
 			return [];
 		}
 	}
@@ -67,9 +71,12 @@ export class DatabaseService {
       `;
 
 			const stmt = db.prepare(query);
-			return stmt.get(userId, serverId) as UserStats | null;
+			const result = stmt.get(userId, serverId) as UserStats | null;
+			db.close();
+			return result;
 		} catch (error) {
 			console.error("Error fetching user stats:", error);
+			db.close();
 			return null;
 		}
 	}
@@ -93,6 +100,7 @@ export class DatabaseService {
 
 			const stmt = db.prepare(query);
 			const results = stmt.all() as Array<{ id: string; name: string }>;
+			db.close();
 
 			// Return servers with formatted names (no Discord API for now)
 			return results.map((server) => ({
@@ -102,6 +110,7 @@ export class DatabaseService {
 			}));
 		} catch (error) {
 			console.error("Error fetching servers:", error);
+			db.close();
 			return [];
 		}
 	}
@@ -123,6 +132,7 @@ export class DatabaseService {
 
 			const stmt = db.prepare(query);
 			const result = stmt.get(serverId) as any;
+			db.close();
 
 			return {
 				total_users: result.total_users || 0,
@@ -132,6 +142,7 @@ export class DatabaseService {
 			};
 		} catch (error) {
 			console.error("Error fetching server stats:", error);
+			db.close();
 			return {
 				total_users: 0,
 				total_messages: 0,
@@ -165,9 +176,12 @@ export class DatabaseService {
       `;
 
 			const stmt = db.prepare(query);
-			return stmt.all(serverId, `%${searchTerm}%`) as LeaderboardEntry[];
+			const results = stmt.all(serverId, `%${searchTerm}%`) as LeaderboardEntry[];
+			db.close();
+			return results;
 		} catch (error) {
 			console.error("Error searching users:", error);
+			db.close();
 			return [];
 		}
 	}
@@ -209,11 +223,13 @@ export class DatabaseService {
 
 			const stmt = db.prepare(query);
 			const results = stmt.all(serverId, limit, offset) as LeaderboardEntry[];
+			db.close();
 
 			// Return results - username will be enriched by Discord API in route handlers
 			return { users: results, total };
 		} catch (error) {
 			console.error("Error fetching all users:", error);
+			db.close();
 			return { users: [], total: 0 };
 		}
 	}
@@ -293,6 +309,8 @@ export class DatabaseService {
 				exp_gained: number;
 			}> = [];
 
+			db.close();
+
 			return {
 				levelDistribution,
 				topPerformers: formattedTopPerformers,
@@ -302,6 +320,7 @@ export class DatabaseService {
 			};
 		} catch (error) {
 			console.error("Error fetching detailed statistics:", error);
+			db.close();
 			return {
 				levelDistribution: [],
 				topPerformers: [],
