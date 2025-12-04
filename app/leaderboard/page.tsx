@@ -229,21 +229,23 @@ export default function LeaderboardPage() {
 						{pagination.totalCount} users
 					</div>
 
-					<div className="flex items-center space-x-2">
-						<button
-							onClick={() => handlePageChange(currentPage - 1)}
-							disabled={!pagination.hasPrev}
-							className="px-4 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
-						>
+				<div className="flex items-center space-x-2">
+					<button
+						type="button"
+						onClick={() => handlePageChange(currentPage - 1)}
+						disabled={!pagination.hasPrev}
+						className="px-4 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
+					>
 							<ChevronLeft className="w-4 h-4" />
 							<span>Previous</span>
-						</button>
+					</button>
 
-						<button
-							onClick={() => handlePageChange(currentPage + 1)}
-							disabled={!pagination.hasNext}
-							className="px-4 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
-						>
+					<button
+						type="button"
+						onClick={() => handlePageChange(currentPage + 1)}
+						disabled={!pagination.hasNext}
+						className="px-4 py-2 bg-discord-dark rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-discord-dark-secondary transition-colors flex items-center space-x-1"
+					>
 							<span>Next</span>
 							<ChevronRight className="w-4 h-4" />
 						</button>

@@ -273,6 +273,7 @@ export default function SettingsPage() {
 							</p>
 						</div>
 						<button
+							type="button"
 							onClick={() =>
 								updateSetting("levelUpMessages", !settings.levelUpMessages)
 							}
@@ -354,6 +355,7 @@ export default function SettingsPage() {
 							</p>
 						</div>
 						<button
+							type="button"
 							onClick={() =>
 								updateSetting("autoRoleEnabled", !settings.autoRoleEnabled)
 							}

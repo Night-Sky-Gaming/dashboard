@@ -123,7 +123,8 @@ export default function Header() {
       <div className="flex items-center space-x-4">
         {/* Notifications */}
         <div className="relative" ref={dropdownRef}>
-          <button 
+          <button
+            type="button"
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-discord-dark relative"
           >
@@ -146,6 +147,7 @@ export default function Header() {
                 <h3 className="text-white font-semibold">Notifications</h3>
                 {unreadCount > 0 && (
                   <button
+                    type="button"
                     onClick={markAllAsRead}
                     className="text-xs text-discord-blurple hover:text-discord-blurple-dark flex items-center space-x-1"
                   >
@@ -189,6 +191,7 @@ export default function Header() {
                           <p className="text-xs text-gray-500">{notification.time}</p>
                         </div>
                         <button
+                          type="button"
                           onClick={() => deleteNotification(notification.id)}
                           className="ml-2 text-gray-500 hover:text-gray-300 transition-colors"
                         >

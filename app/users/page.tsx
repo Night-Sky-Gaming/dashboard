@@ -288,21 +288,23 @@ export default function UsersPage() {
 						Page {currentPage} of {totalPages} • Showing {((currentPage - 1) * usersPerPage) + 1} to {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
 					</div>
 
-					<div className="flex items-center space-x-2">
-						<button
-							onClick={() => handlePageChange(currentPage - 1)}
-							disabled={currentPage === 1}
-							className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-						>
+				<div className="flex items-center space-x-2">
+					<button
+						type="button"
+						onClick={() => handlePageChange(currentPage - 1)}
+						disabled={currentPage === 1}
+						className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+					>
 							<ChevronLeft className="w-4 h-4" />
 							<span>Previous</span>
-						</button>
+					</button>
 
-						<button
-							onClick={() => handlePageChange(currentPage + 1)}
-							disabled={currentPage === totalPages}
-							className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-						>
+					<button
+						type="button"
+						onClick={() => handlePageChange(currentPage + 1)}
+						disabled={currentPage === totalPages}
+						className="px-4 py-2 bg-discord-darker border border-gray-700 rounded-lg text-white hover:bg-discord-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+					>
 							<span>Next</span>
 							<ChevronRight className="w-4 h-4" />
 						</button>

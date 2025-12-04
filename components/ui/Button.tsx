@@ -29,6 +29,7 @@ export function Button({
   
   return (
     <button
+      type="button"
       className={cn(baseStyles, variants[variant], sizes[size], className)}
       {...props}
     >
