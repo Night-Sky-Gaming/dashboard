@@ -4,13 +4,8 @@ const nextConfig = {
   images: {
     domains: ['cdn.discordapp.com'],
   },
-  // Disable Server Actions to prevent random errors
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-      allowedOrigins: ['*'],
-    },
-  },
+  // Completely disable experimental features to prevent Server Action errors
+  experimental: {},
   // Generate consistent build IDs to prevent deployment mismatches
   generateBuildId: async () => {
     // Use timestamp or version from package.json
@@ -44,10 +39,17 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
           },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
         ],
       },
     ];
   },
+  // Optimize output for production
+  output: 'standalone',
+  poweredByHeader: false,
 }
 
 module.exports = nextConfig
