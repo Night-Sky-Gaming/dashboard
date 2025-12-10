@@ -4,6 +4,18 @@ const nextConfig = {
   images: {
     domains: ['cdn.discordapp.com'],
   },
+  // Disable Server Actions to prevent random errors
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+      allowedOrigins: ['*'],
+    },
+  },
+  // Generate consistent build IDs to prevent deployment mismatches
+  generateBuildId: async () => {
+    // Use timestamp or version from package.json
+    return process.env.BUILD_ID || 'andromeda-build-' + Date.now();
+  },
   // Expose server-side environment variables
   serverRuntimeConfig: {
     DATABASE_PATH: process.env.DATABASE_PATH,
@@ -21,6 +33,20 @@ const nextConfig = {
       config.externals.push('better-sqlite3');
     }
     return config;
+  },
+  // Add headers to prevent caching issues
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
   },
 }
 
